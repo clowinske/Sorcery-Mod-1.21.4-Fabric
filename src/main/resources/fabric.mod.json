@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "sorcery-mod",
+	"version": "${version}",
+	"name": "Sorcery Mod",
+	"description": "Adds a little sorcery",
+	"authors": [
+		"Code7y7"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/sorcery-mod/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.code7y7.sorcerymod.SorceryMod"
+		],
+		"fabric-datagen": [
+			"net.code7y7.sorcerymod.SorceryModDataGenerator"
+		],
+		"client": [
+			"net.code7y7.sorcerymod.SorceryModClient"
+		]
+	},
+	"mixins": [
+		"sorcery-mod.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

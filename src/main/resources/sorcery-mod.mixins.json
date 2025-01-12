@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "net.code7y7.sorcerymod.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ExampleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
