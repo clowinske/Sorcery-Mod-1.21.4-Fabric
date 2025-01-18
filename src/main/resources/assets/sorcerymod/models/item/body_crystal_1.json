@@ -1,0 +1,6 @@
+{
+	"parent": "sorcerymod:item/common_crystal_model_1",
+	"textures": {
+		"0": "sorcerymod:item/body_crystal"
+	}
+}

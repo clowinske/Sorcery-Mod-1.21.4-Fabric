@@ -1,0 +1,24 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"1": "sorcerymod:block/crystal_altar_bottom",
+		"2": "sorcerymod:block/crystal_altar_top",
+		"3": "sorcerymod:block/crystal_altar_side",
+		"particle": "sorcerymod:block/crystal_altar_bottom"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 12, 16],
+			"faces": {
+				"north": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "north"},
+				"east": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "east"},
+				"south": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "south"},
+				"west": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#1", "cullface": "down"}
+			}
+		}
+	]
+}

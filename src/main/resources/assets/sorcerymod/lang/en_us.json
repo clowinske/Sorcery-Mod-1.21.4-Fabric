@@ -1,7 +1,27 @@
 {
   "itemgroup.sorcerymod.sorcerymod_group": "Sorcery Mod",
 
-
   "item.sorcerymod.inert_crystal": "Inert Crystal",
-  "item.sorcerymod.fire_crystal": "Fire Crystal"
+  "item.sorcerymod.fire_crystal": "Fire Crystal",
+  "item.sorcerymod.electricity_crystal": "Electricity Crystal",
+  "item.sorcerymod.gravity_crystal": "Gravity Crystal",
+  "item.sorcerymod.mind_crystal": "Mind Crystal",
+  "item.sorcerymod.body_crystal": "Body Crystal",
+  "item.sorcerymod.soul_crystal": "Soul Crystal",
+  "item.sorcerymod.discord_crystal": "Discord Crystal",
+  "item.sorcerymod.eclipse_crystal": "Eclipse Crystal",
+  "item.sorcerymod.radiant_crystal": "Radiant Crystal",
+  "item.sorcerymod.crystal_altar": "Crystal Altar",
+
+  "commands.upgradecrystal.no_player": "Player not found",
+  "commands.upgradecrystal.inert": "Crystal must not be inert",
+  "commands.upgradecrystal.success": "Crystal successfully upgraded",
+  "commands.upgradecrystal.max_tier": "Crystal is already max tier",
+  "commands.upgradecrystal.fail": "Not a valid crystal",
+
+  "commands.crystalabilities.no_player": "Player not found",
+  "commands.crystalabilities.added": "Successfully added: ",
+  "commands.crystalabilities.unlocked": "Already unlocked: ",
+  "commands.crystalabilities.invalid": "Invalid ability",
+  "commands.crystalabilities.no_crystal": "Not a crystal"
 }
