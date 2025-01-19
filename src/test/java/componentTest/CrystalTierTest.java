@@ -20,7 +20,7 @@ public class CrystalTierTest {
         CrystalTier crystalTier = new CrystalTier(level);
         assertEquals(level, crystalTier.getValue());
     }
-//test
+
     @ParameterizedTest
     @ValueSource(ints = {CrystalTier.MAX_LEVEL + 1, -1})
     void InvalidLevels_ThrowIllegalArgumentException(int invalidLevel) {
