@@ -23,5 +23,8 @@
   "commands.crystalabilities.added": "Successfully added: ",
   "commands.crystalabilities.unlocked": "Already unlocked: ",
   "commands.crystalabilities.invalid": "Invalid ability",
-  "commands.crystalabilities.no_crystal": "Not a crystal"
+  "commands.crystalabilities.no_crystal": "Not a crystal",
+
+  "category.sorcerymod.sorcerymod": "Sorcery Mod",
+  "key.sorcerymod.spell": "Spell"
 }
