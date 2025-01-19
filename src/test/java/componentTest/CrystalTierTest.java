@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CrystalTierTest {
-
+//test2
     @Test
     void WhenLevelIsMaxLevel_ReturnString() {
         CrystalTier crystalTier = new CrystalTier(CrystalTier.MAX_LEVEL);
@@ -20,7 +20,7 @@ public class CrystalTierTest {
         CrystalTier crystalTier = new CrystalTier(level);
         assertEquals(level, crystalTier.getValue());
     }
-//test
+
     @ParameterizedTest
     @ValueSource(ints = {CrystalTier.MAX_LEVEL + 1, -1})
     void InvalidLevels_ThrowIllegalArgumentException(int invalidLevel) {
