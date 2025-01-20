@@ -2,7 +2,6 @@ package net.code7y7.sorcerymod;
 
 import net.code7y7.sorcerymod.block.ModBlockEntities;
 import net.code7y7.sorcerymod.block.ModBlocks;
-import net.code7y7.sorcerymod.client.ModEntityModels;
 import net.code7y7.sorcerymod.commands.CrystalAbilitiesCommand;
 import net.code7y7.sorcerymod.commands.UpgradeCrystalCommand;
 import net.code7y7.sorcerymod.component.ModDataComponentTypes;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class SorceryMod implements ModInitializer {
 	public static final String MOD_ID = "sorcerymod";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-//test last conflict
+
 	@Override
 	public void onInitialize() {
 		ModItems.registerModItems();
