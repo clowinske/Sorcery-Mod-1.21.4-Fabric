@@ -16,7 +16,6 @@ public abstract class PlayerEntityRendererMixin {
     private void sorcery$injectUpdateRenderState(AbstractClientPlayerEntity abstractClientPlayerEntity, PlayerEntityRenderState state, float f, CallbackInfo ci) {
 
         ((RenderStateAccess)state).sorcerymod$setLeftHandCharge(SpellHelper.getHandCharge(abstractClientPlayerEntity, "left"));
-        System.out.println(abstractClientPlayerEntity.getName() + ", " + ((RenderStateAccess)state).sorcerymod$getLeftHandCharge());
         ((RenderStateAccess)state).sorcerymod$setRightHandCharge(SpellHelper.getHandCharge(abstractClientPlayerEntity, "right"));
         ((RenderStateAccess)state).sorcerymod$setLeftHandSpell(SpellHelper.getHandSpell(abstractClientPlayerEntity, "left").getInt());
         ((RenderStateAccess)state).sorcerymod$setRightHandSpell(SpellHelper.getHandSpell(abstractClientPlayerEntity, "right").getInt());
