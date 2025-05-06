@@ -46,6 +46,8 @@ public class ModItems {
             new ParticleTest(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID,"particle_test")))));
     public static final Item CRYSTAL_POUCH = registerItem("crystal_pouch",
             new CrystalPouchItem(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID,"crystal_pouch")))));
+    public static final Item PRISMATIC_CRYSTAL = registerItem("prismatic_crystal",
+            new Item(new Item.Settings().rarity(Rarity.RARE).registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "prismatic_crystal")))));
 
     private static Item registerItem(String name, Item item){
         return Registry.register(Registries.ITEM, Identifier.of(SorceryMod.MOD_ID,  name), item);
