@@ -5,40 +5,119 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.LightType;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
-public class LightningParticle extends Particle {
+import java.util.ArrayList;
+import java.util.List;
+
+public class LightningParticle extends SpriteBillboardParticle {
     private final Vector3f destination;
     private final Vector3f color;
+    private final boolean hasCore;
+    private final float branchChance;
+    private final List<Vector3f> points;
+    private int segments = 6;
+    private  float radius = 0.01f;
+    float totalDistance;
+    float alphaMultiplier;
 
-    public LightningParticle(ClientWorld world, double x, double y, double z, Vector3f destination, Vector3f color) {
+    public LightningParticle(ClientWorld world, double x, double y, double z, Vector3f destination, Vector3f color, float radius, boolean hasCore, float branchChance, int ticks, SpriteProvider provider) {
         super(world, x, y, z);
         this.destination = destination;
         this.color = color;
+        this.radius = radius;
+        this.hasCore = hasCore;
+        this.branchChance = branchChance;
+        this.setSprite(provider);
+        this.maxAge = ticks;
+        this.scale(1f);
+        this.setAlpha(0.3f);
+        this.alphaMultiplier = 1;
 
-        // Customizable lifetime
-        this.maxAge = 10 + random.nextInt(10); // Random lifespan between 10 and 20 ticks
-        this.scale(1f); // Adjust thickness of the beam
+
+        // Precompute the segmented points.
+        // Start point is the particle's current position.
+        Vector3f startPos = new Vector3f((float) x, (float) y, (float) z);
+        Vector3f dest = new Vector3f(destination);
+        Vector3f diff = new Vector3f(dest).sub(startPos);
+        totalDistance = diff.length();
+        diff.normalize();
+        segments = Math.max(2, (int) totalDistance);
+
+        // Compute two perpendicular directions (u and v) to use for offsetting.
+        Vector3f u = createPerpendicular(diff);
+        Vector3f v = new Vector3f(diff).cross(u).normalize();
+
+        points = new ArrayList<>();
+        points.add(startPos);
+
+        for (int i = 1; i < segments; i++) {
+            float t = (float) i / segments; // interpolation factor
+            Vector3f base = new Vector3f(startPos).lerp(dest, t);
+
+            float segmentLength = totalDistance / segments;
+            float wiggleAmplitude = segmentLength * 0.05f;
+
+            float endpointFactor = 1.0f;
+            if (t < 0.3f) {
+                endpointFactor = t / 0.3f;
+            } else if (t > 0.7f) {
+                endpointFactor = (1 - t) / 0.3f;
+            }
+            // Generate random offsets in both perpendicular directions.
+            float offsetU = (this.random.nextFloat() * 2 - 1) * wiggleAmplitude * endpointFactor;
+            float offsetV = (this.random.nextFloat() * 2 - 1) * wiggleAmplitude * endpointFactor;
+            Vector3f offset = new Vector3f(u).mul(offsetU).add(new Vector3f(v).mul(offsetV));
+            Vector3f point = new Vector3f(base).add(offset);
+            points.add(point);
+        }
+        // Ensure the final point is exactly the destination.
+        points.add(dest);
+
+        generateBranches();
+    }
+
+    private void generateBranches() {
+        if (branchChance <= 0) return;
+
+        for (int i = 1; i < points.size() - 1; i++) { // Skip first and last points
+            if (this.random.nextFloat() < branchChance) {
+                Vector3f branchPoint = points.get(i);
+
+                // Generate a random direction for the branch
+                Vector3f direction = new Vector3f(
+                        this.random.nextFloat() - 0.5f,
+                        this.random.nextFloat() - 0.5f,
+                        this.random.nextFloat() - 0.5f
+                ).normalize();
+
+                // Branch length as a fraction of the main lightning's length
+                float branchLength = totalDistance * 0.3f;
+                Vector3f branchDest = new Vector3f(branchPoint).add(direction.mul(branchLength));
+
+                world.addParticle(new LightningParticleEffect(color, branchDest, radius, hasCore, branchChance * 0.5f, maxAge), branchPoint.x, branchPoint.y, branchPoint.z, 0, 0, 0);
+            }
+        }
     }
 
     @Override
     public void tick() {
         super.tick();
-
-        // Fade out towards the end of the particle's life
-        this.alpha = Math.clamp(1.0f - (float) this.age / this.maxAge, 0.0f, 1.0f);
+        if(this.age >= this.maxAge/2)
+            this.alphaMultiplier = (maxAge - age) / (float) maxAge;
 
         if (this.age >= this.maxAge) {
             this.markDead();
@@ -47,105 +126,158 @@ public class LightningParticle extends Particle {
 
     @Override
     public void render(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
-        Vec3d interpolatedPosition = camera.getPos();
-        double startX = Math.lerp(tickDelta, this.prevPosX, this.x) - interpolatedPosition.x;
-        double startY = Math.lerp(tickDelta, this.prevPosY, this.y) - interpolatedPosition.y;
-        double startZ = Math.lerp(tickDelta, this.prevPosZ, this.z) - interpolatedPosition.z;
+        Vec3d cameraPos = camera.getPos();
+        Quaternionf rotation = camera.getRotation();
 
-        double endX = this.destination.x - interpolatedPosition.x;
-        double endY = this.destination.y - interpolatedPosition.y;
-        double endZ = this.destination.z - interpolatedPosition.z;
+        // Calculate the camera's forward vector.
+        Vector3f cameraForward = new Vector3f(0, 0, 1);
+        rotation.transform(cameraForward);
+        cameraForward.normalize();
 
-        // Draw the lightning beam
-        RenderSystem.setShaderColor(color.x(), color.y(), color.z(), this.alpha);
-        MatrixStack matrixStack = new MatrixStack();
-        int light = 240;
-        renderBeam(
-                vertexConsumer,
-                matrixStack,
-                startX,
-                startY,
-                startZ,
-                endX,
-                endY,
-                endZ,
-                0.0f, // uStart
-                0.0f, // vStart
-                1.0f, // uEnd
-                1.0f,  // vEnd
-                light
+        // Loop through each segment and render a tube between each successive pair of points.
+        for (int i = 0; i < points.size() - 1; i++) {
+            Vector3f startWorld = points.get(i);
+            Vector3f endWorld = points.get(i + 1);
+
+            // Adjust world coordinates relative to the camera.
+            Vector3f start = new Vector3f(
+                    startWorld.x() - (float) cameraPos.getX(),
+                    startWorld.y() - (float) cameraPos.getY(),
+                    startWorld.z() - (float) cameraPos.getZ()
+            );
+            Vector3f end = new Vector3f(
+                    endWorld.x() - (float) cameraPos.getX(),
+                    endWorld.y() - (float) cameraPos.getY(),
+                    endWorld.z() - (float) cameraPos.getZ()
+            );
+
+            // Compute the direction of the segment and generate perpendicular vectors.
+            Vector3f segmentDir = new Vector3f(end).sub(start);
+            float length = segmentDir.length();
+            if (length < 1e-6f) continue;
+            segmentDir.normalize();
+            Vector3f u = createPerpendicular(segmentDir);
+            Vector3f v = new Vector3f(segmentDir).cross(u).normalize();
+
+            u.mul(radius);
+            v.mul(radius);
+
+
+            Vector3f uInner = new Vector3f(u).mul(0.3f);
+            Vector3f vInner = new Vector3f(v).mul(0.3f);
+            Vector3f innerColor = new Vector3f(1.0f, 1.0f, 1.0f);
+            if(hasCore) {
+                RenderSystem.depthMask(false);
+                RenderSystem.disableDepthTest();
+                renderTube(vertexConsumer, start, end, uInner, vInner, innerColor, 1.0f * alphaMultiplier, cameraForward, true);
+                RenderSystem.enableDepthTest();
+                RenderSystem.depthMask(true);
+            }
+
+            Vector3f uMid = new Vector3f(u).mul(0.5f);
+            Vector3f vMid = new Vector3f(v).mul(0.5f);
+            Vector3f midColor = this.color;
+            //renderTube(vertexConsumer, start, end, uMid, vMid, midColor, this.alpha/2, cameraForward);
+
+            // Render the outer colored tube.
+            renderTube(vertexConsumer, start, end, u, v, this.color, this.alpha * alphaMultiplier, cameraForward, false);
+
+        }
+    }
+
+    private void renderTube(VertexConsumer vertexConsumer, Vector3f start, Vector3f end, Vector3f u, Vector3f v, Vector3f color, float alpha, Vector3f cameraForward, boolean renderCaps) {
+        Vector3f[] startCorners = calculateCorners(start, u, v);
+        Vector3f[] endCorners = calculateCorners(end, u, v);
+
+        for (int i = 0; i < 4; i++) {
+            int next = (i + 1) % 4;
+            float depthOffset = i * 0.00f;
+            Vector3f offset = new Vector3f(cameraForward).mul(depthOffset);
+            buildQuad(vertexConsumer,
+                    offsetAdd(startCorners[i], offset),
+                    offsetAdd(startCorners[next], offset),
+                    offsetAdd(endCorners[i], offset),
+                    offsetAdd(endCorners[next], offset),
+                    color,
+                    alpha
+            );
+        }
+        if(renderCaps) {
+            renderCap(vertexConsumer, start, new Vector3f(start).sub(end).normalize(), u, v, color, alpha, 12);
+            renderCap(vertexConsumer, end, new Vector3f(end).sub(start).normalize(), u, v, color, alpha, 12);
+        }
+
+    }
+
+    private Vector3f offsetAdd(Vector3f original, Vector3f offset) {
+        return new Vector3f(original).add(offset);
+    }
+
+    private Vector3f createPerpendicular(Vector3f direction) {
+        Vector3f axis = Math.abs(direction.y()) > 0.9f ? new Vector3f(1, 0, 0) : new Vector3f(0, 1, 0);
+        return new Vector3f(direction).cross(axis).normalize();
+    }
+
+    private Vector3f[] calculateCorners(Vector3f center, Vector3f u, Vector3f v) {
+        return new Vector3f[] {
+                new Vector3f(center).add(u).add(v),
+                new Vector3f(center).add(u).sub(v),
+                new Vector3f(center).sub(u).sub(v),
+                new Vector3f(center).sub(u).add(v)
+        };
+    }
+
+    private void buildQuad(VertexConsumer buffer, Vector3f s1, Vector3f s2, Vector3f e1, Vector3f e2, Vector3f color, float alpha) {
+        addVertex(buffer, s1, getMaxU(), getMaxV(), color, alpha);
+        addVertex(buffer, e1, getMaxU(), getMinV(), color, alpha);
+        addVertex(buffer, e2, getMinU(), getMinV(), color, alpha);
+        addVertex(buffer, s2, getMinU(), getMaxV(), color, alpha);
+    }
+
+    private void addVertex(VertexConsumer buffer, Vector3f pos, float u, float v, Vector3f color, float alpha) {
+        buffer.vertex(pos.x, pos.y, pos.z)
+                .color(color.x(), color.y(), color.z(), alpha)
+                .texture(u, v)
+                .light(getLight());
+    }
+
+    private void renderCap(VertexConsumer buffer, Vector3f center, Vector3f normal, Vector3f u, Vector3f v, Vector3f color, float alpha, int segments) {
+        float angleStep = (float) (2 * Math.PI / segments);
+        Vector3f prev = new Vector3f(center).add(new Vector3f(u).add(v));
+
+        for (int i = 1; i <= segments; i++) {
+            float angle = i * angleStep;
+            float cos = (float) Math.cos(angle);
+            float sin = (float) Math.sin(angle);
+
+            Vector3f radial = new Vector3f(u).mul(cos).add(new Vector3f(v).mul(sin));
+            Vector3f point = new Vector3f(center).add(radial);
+
+            addVertex(buffer, center, getMinU(), getMinV(), color, alpha);
+            addVertex(buffer, prev, getMaxU(), getMinV(), color, alpha);
+            addVertex(buffer, point, getMaxU(), getMaxV(), color, alpha);
+
+            prev = point;
+        }
+    }
+
+    private int getLight() {
+        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+        return WorldRenderer.getLightmapCoordinates(
+                world,
+                new BlockPos(
+                        (int) (this.x - cameraPos.x),
+                        (int) (this.y - cameraPos.y),
+                        (int) (this.z - cameraPos.z)
+                )
         );
     }
 
-    public static void renderBeam(VertexConsumer vertexConsumer, MatrixStack matrixStack,
-                                  double startX, double startY, double startZ,
-                                  double endX, double endY, double endZ,
-                                  float uStart, float vStart, float uEnd, float vEnd, int light) {
-        // Calculate beam direction and length
-        float dx = (float) (endX - startX);
-        float dy = (float) (endY - startY);
-        float dz = (float) (endZ - startZ);
-        float length = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-        // Normalize direction vector
-        Vector3f direction = new Vector3f(dx / length, dy / length, dz / length);
-
-        // Set up perpendicular vectors for beam thickness
-        Vector3f perpendicular1 = new Vector3f(direction.z(), 0, -direction.x());
-        perpendicular1.normalize();
-
-        Vector3f perpendicular2 = new Vector3f(direction.x() * direction.y(), -direction.z() * direction.z(), direction.z());
-        perpendicular2.normalize();
-
-        // UV step based on the number of segments
-        int segments = 8; // Adjust for smoothness
-        float uvStep = (uEnd - uStart) / segments;
-
-        // Draw quads along the beam
-        matrixStack.push();
-        RenderSystem.disableCull(); // Disable culling for better beam appearance
-
-        for (int i = 0; i < segments; i++) {
-            // Current and next segment position
-            float t1 = i / (float) segments;
-            float t2 = (i + 1) / (float) segments;
-
-            double x1 = startX + dx * t1;
-            double y1 = startY + dy * t1;
-            double z1 = startZ + dz * t1;
-
-            double x2 = startX + dx * t2;
-            double y2 = startY + dy * t2;
-            double z2 = startZ + dz * t2;
-
-            // UV coordinates
-            float v1 = vStart + t1 * (vEnd - vStart);
-            float v2 = vStart + t2 * (vEnd - vStart);
-
-            // Create vertices for this quad
-            addVertex(vertexConsumer, matrixStack, x1, y1, z1, -perpendicular1.x(), -perpendicular1.y(), -perpendicular1.z(), uStart, v1, light);
-            addVertex(vertexConsumer, matrixStack, x1, y1, z1, perpendicular1.x(), perpendicular1.y(), perpendicular1.z(), uEnd, v1, light);
-            addVertex(vertexConsumer, matrixStack, x2, y2, z2, perpendicular1.x(), perpendicular1.y(), perpendicular1.z(), uEnd, v2, light);
-            addVertex(vertexConsumer, matrixStack, x2, y2, z2, -perpendicular1.x(), -perpendicular1.y(), -perpendicular1.z(), uStart, v2, light);
-        }
-
-        matrixStack.pop();
-    }
-
-    private static void addVertex(VertexConsumer vertexConsumer, MatrixStack matrixStack,
-                                  double x, double y, double z,
-                                  double offsetX, double offsetY, double offsetZ,
-                                  float u, float v, int light) {
-        vertexConsumer.vertex(matrixStack.peek().getPositionMatrix(),
-                        (float) (x + offsetX), (float) (y + offsetY), (float) (z + offsetZ))
-                .texture(u, v)
-                .color(255, 255, 255, 255)
-                .light(light);
-    }
     @Override
     public ParticleTextureSheet getType() {
         return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
     }
+
 
     @Environment(EnvType.CLIENT)
     public record LightningParticleFactory(SpriteProvider provider) implements ParticleFactory<LightningParticleEffect> {
@@ -153,9 +285,12 @@ public class LightningParticle extends Particle {
         public Particle createParticle(LightningParticleEffect effect, ClientWorld world, double x, double y, double z, double dx, double dy, double dz) {
             Vector3f color = effect.getColor();
             Vector3f destination = effect.getDestination();
-            return new LightningParticle(world, x, y, z, destination, color);
+            boolean hasCore = effect.hasCore();
+            float branchChance = effect.getBranchChance();
+            float radius = effect.getRadius();
+            int ticks = effect.getTicks();
+            // Assume that LightningParticleEffect now provides a segments value.
+            return new LightningParticle(world, x, y, z, destination, color, radius, hasCore, branchChance, ticks, provider);
         }
     }
 }
-
-

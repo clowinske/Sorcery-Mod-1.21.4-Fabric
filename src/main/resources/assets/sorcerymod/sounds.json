@@ -1,0 +1,20 @@
+{
+  "gravity_push": {
+    "subtitle": "sounds.sorcerymod.gravity_push",
+    "sounds": [
+      "sorcerymod:gravity_push"
+    ]
+  },
+  "orb_ui_click": {
+    "subtitle": "sounds.sorcerymod.orb_ui_click",
+    "sounds": [
+      "sorcerymod:orb_ui_click"
+    ]
+  },
+  "orb_ui_select": {
+    "subtitle": "sounds.sorcerymod.orb_ui_select",
+    "sounds": [
+      "sorcerymod:orb_ui_select"
+    ]
+  }
+}

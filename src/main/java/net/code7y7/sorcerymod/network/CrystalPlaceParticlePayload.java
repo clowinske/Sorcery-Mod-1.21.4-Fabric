@@ -7,11 +7,12 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public record CrystalPlaceParticlePayload(BlockPos pos, int rgb) implements CustomPayload {
+public record CrystalPlaceParticlePayload(BlockPos pos, int rgb, float y) implements CustomPayload {
 public static final CustomPayload.Id<CrystalPlaceParticlePayload> ID = new CustomPayload.Id<>(Packets.SHOW_CRYSTAL_PLACE_PARTICLE);
     public static final PacketCodec<RegistryByteBuf, CrystalPlaceParticlePayload> CODEC = PacketCodec.tuple(
             BlockPos.PACKET_CODEC, CrystalPlaceParticlePayload::pos,
             PacketCodecs.INTEGER, CrystalPlaceParticlePayload::rgb,
+            PacketCodecs.FLOAT, CrystalPlaceParticlePayload::y,
             CrystalPlaceParticlePayload::new);
 
     @Override

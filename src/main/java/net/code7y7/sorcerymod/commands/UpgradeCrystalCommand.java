@@ -32,9 +32,9 @@ public class UpgradeCrystalCommand {
         var heldItemStack = player.getMainHandStack();
         var heldItem = heldItemStack.getItem();
 
-        if (heldItem instanceof ElementalCrystalItem crystalItem) {
+        if (heldItem instanceof InertCrystalItem crystalItem) {
             if (crystalItem.getTier(heldItemStack) < crystalItem.getMaxTier()) {
-                crystalItem.upgradeCrystal(player, heldItemStack, 1);
+                crystalItem.upgradeCrystal(heldItemStack, 1);
                 context.getSource().sendFeedback(() -> Text.translatable("commands.upgradecrystal.success"), true);
             } else {
                 context.getSource().sendError(Text.translatable("commands.upgradecrystal.max_tier"));
