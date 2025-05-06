@@ -12,6 +12,20 @@
   "item.sorcerymod.eclipse_crystal": "Eclipse Crystal",
   "item.sorcerymod.radiant_crystal": "Radiant Crystal",
   "item.sorcerymod.crystal_altar": "Crystal Altar",
+  "item.sorcerymod.crystal_pouch": "Crystal Pouch",
+  "item.sorcerymod.attuning_orb": "Attuning Orb",
+  "item.sorcerymod.prismatic_crystal": "Prismatic Crystal",
+
+  "element.sorcerymod.electricity": "Electricity",
+  "element.sorcerymod.gravity": "Gravity",
+  "element.sorcerymod.fire": "Fire",
+  "element.sorcerymod.mind": "Mind",
+  "element.sorcerymod.body": "Body",
+  "element.sorcerymod.soul": "Soul",
+  "element.sorcerymod.radiant": "Radiant",
+  "element.sorcerymod.eclipse": "Eclipse",
+  "element.sorcerymod.discord": "Discord",
+  "crystalorb.ui.theme": "Theme",
 
   "commands.upgradecrystal.no_player": "Player not found",
   "commands.upgradecrystal.inert": "Crystal must not be inert",
@@ -24,6 +38,49 @@
   "commands.crystalabilities.unlocked": "Already unlocked: ",
   "commands.crystalabilities.invalid": "Invalid ability",
   "commands.crystalabilities.no_crystal": "Not a crystal",
+
+  "commands.corruption.set": "Set %s's corruption level to %d",
+  "commands.corruption.get": "%s's corruption level is %d",
+  "commands.sorcerymod.corruption.add": "Added %d to %s's corruption level. New level: %d",
+
+  "sounds.sorcerymod.gravity_push": "Gravity Push",
+
+  "crystal_options.ability.default": "Default Ability",
+  "crystal_options.ability.unknown": "???",
+  "crystal_options.option.default": "Default Option",
+  "crystal_options.option.no_options": "No Options",
+
+  "crystal_options.ability.electricity.blink": "Blink",
+  "crystal_options.option.blink.blink_distance": "Blink Distance",
+  "crystal_options.option.blink.blink_type": "Blink Type",
+  "crystal_options.ability.electricity.lightning": "Lightning",
+  "crystal_options.ability.electricity.lightning_bolt": "Lightning Bolt",
+  "crystal_options.ability.electricity.electric_imbue": "Electric Imbue",
+  "crystal_options.ability.electricity.chain_lightning_bolt": "Chain Lightning Bolt",
+  "crystal_options.option.chain_lightning_bolt.chain_count": "Chain Count",
+  "crystal_options.ability.electricity.chain_lightning": "Chain Lightning",
+  "crystal_options.option.chain_lightning.chain_count": "Chain Count",
+
+  "crystal_options.ability.fire.fireball": "Fire Ball",
+  "crystal_options.ability.fire.flaming_imbue": "Flaming Imbue",
+  "crystal_options.ability.fire.scorch": "Scorch",
+  "crystal_options.ability.fire.fireball_ricochet": "Fire Ball Ricochet",
+  "crystal_options.option.fireball_ricochet.ricochet_bounces": "Ricochet Bounces",
+  "crystal_options.ability.fire.fire_burst": "Fire Burst",
+  "crystal_options.option.fire_spray.crouch_arms": "Crouch Arms",
+
+  "crystal_options.ability.gravity.push": "Push",
+  "crystal_options.ability.gravity.pull": "Pull",
+
+  "crystal_options.ability.body.adrenaline_rush": "Adrenaline Rush",
+  "crystal_options.ability.body.body_mastery": "Body Mastery",
+  "crystal_options.ability.body.blood_sap": "Blood Sap",
+  "crystal_options.ability.body.blood_sap_mastery": "Blood Sap Mastery",
+  "crystal_options.ability.body.vitality_surplus": "Vitality Surplus",
+  "crystal_options.ability.body.sanguine_bond": "Sanguine Bond",
+  "crystal_options.ability.body.ironclad_metabolism": "Ironclad Metabolism",
+
+  "stat.sorcerymod.time_pondering_the_orb": "Time Pondering the Orb",
 
   "category.sorcerymod.sorcerymod": "Sorcery Mod",
   "key.sorcerymod.spell": "Spell"

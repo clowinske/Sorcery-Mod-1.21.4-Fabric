@@ -2,11 +2,16 @@ package net.code7y7.sorcerymod.block.CrystalAltarBlock;
 
 import com.mojang.serialization.MapCodec;
 import net.code7y7.sorcerymod.block.ModBlockEntities;
+import net.code7y7.sorcerymod.block.ModBlocks;
+import net.code7y7.sorcerymod.component.ModDataComponentTypes;
+import net.code7y7.sorcerymod.entity.custom.UpgradeOrbEntity;
+import net.code7y7.sorcerymod.item.CrystalPouchItem;
 import net.code7y7.sorcerymod.item.InertCrystalItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -20,17 +25,27 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.block.WireOrientation;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public class CrystalAltarBlock extends BlockWithEntity {
-    private static final VoxelShape SHAPE = Block.createCuboidShape(0, 0, 0, 16, 12, 16);
+    private static final VoxelShape SHAPE1 = Block.createCuboidShape(0, 0, 0, 16, 12, 16);
+    private static final VoxelShape SHAPE2 = Block.createCuboidShape(3, 12, 3, 13, 16, 13);
+    private static final VoxelShape SHAPE3 = Block.createCuboidShape(3, 16, 3, 13, 32, 13);
+    private static final VoxelShape SHAPE4 = Block.createCuboidShape(3, 32, 3, 13, 41, 13);
+    private static final VoxelShape SHAPE = VoxelShapes.union(SHAPE1, SHAPE2, SHAPE3, SHAPE4);
+
+
     public static final EnumProperty<Direction> FACING = HorizontalFacingBlock.FACING;
 
     public CrystalAltarBlock(Settings settings) {
-        super(settings);
-        this.setDefaultState((this.stateManager.getDefaultState()).with(FACING, Direction.NORTH ));
+        super(settings.nonOpaque());
+        this.setDefaultState((this.stateManager.getDefaultState()).with(FACING, Direction.NORTH));
     }
 
     @Override
@@ -52,7 +67,6 @@ public class CrystalAltarBlock extends BlockWithEntity {
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new CrystalAltarBlockEntity(pos, state);
-
     }
 
     @Override
@@ -72,6 +86,8 @@ public class CrystalAltarBlock extends BlockWithEntity {
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        Block upBlock = world.getBlockState(pos.up()).getBlock();
+        Block upupBlock = world.getBlockState(pos.up(2)).getBlock();
         if(state.getBlock() != newState.getBlock()){
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if(blockEntity instanceof CrystalAltarBlockEntity){
@@ -82,42 +98,54 @@ public class CrystalAltarBlock extends BlockWithEntity {
     }
 
     @Override
-    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!world.isClient() && hand.equals(hand.MAIN_HAND)) { //happens on server and only executes on main hand
-
-            CrystalAltarBlockEntity blockEntity = (CrystalAltarBlockEntity) world.getBlockEntity(pos); //defines the Crystal Altar Block Entity #use is executing from
-
-            if (stack.getItem() instanceof InertCrystalItem && !((InertCrystalItem) stack.getItem()).hasElement) { //if heldItem is a crystal that does not have an element (inert)
-                if (blockEntity.containerEmpty()) { //if there are no elemental or inert crystals
-                    blockEntity.addCrystal((ServerPlayerEntity) player, stack, true); //add inert crystal
-
-                    return ActionResult.SUCCESS_SERVER; //Added inert crystal to altar
-                } else
-                    return ActionResult.PASS; //inert crystal is already in altar
-
-            } else if (stack.getItem() instanceof InertCrystalItem && ((InertCrystalItem) stack.getItem()).hasElement) { //if heldItem is a crystal that has an element
-                if (!blockEntity.hasInertCrystal() && blockEntity.canPlaceElementalSlot(stack)) { //if altar has no inert crystal, and empty elemental slots
-
-                    blockEntity.addCrystal((ServerPlayerEntity) player, stack, false); //add elemental crystal
-
-                    return ActionResult.SUCCESS_SERVER; //Added elemental crystal to altar
-
-                } else
-                    return ActionResult.PASS; //has inert crystal, or no free slots
-            } else if (stack.isEmpty()) { //clicked with empty hand
-                if (!blockEntity.containerEmpty()) {  //if there is something to take out
-                    player.giveItemStack(blockEntity.removeCrystal((ServerPlayerEntity) player));
-                    return ActionResult.SUCCESS_SERVER; // removed crystal from altar
-                }
-            } else {
-                return ActionResult.FAIL;
-            }
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+        super.neighborUpdate(state, world, pos, sourceBlock, wireOrientation, notify);
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if(world.getBlockState(pos.up()).isAir()){
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            ItemScatterer.spawn(world, pos, ((CrystalAltarBlockEntity) blockEntity).getInventory());
         }
-        return ActionResult.FAIL; //if nothing else happens
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        return super.onUse(state, world, pos, player, hit);
+    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        super.onPlaced(world, pos, state, placer, itemStack);
+        BlockState topBlock = ModBlocks.CRYSTAL_ALTAR_TOP.getDefaultState().with(FACING, state.get(FACING));
+        BlockState tipBlock = ModBlocks.CRYSTAL_ALTAR_TIP.getDefaultState().with(FACING, state.get(FACING));
+        world.setBlockState(pos.up(), topBlock);
+        world.setBlockState(pos.up(2), tipBlock);
+    }
+
+    @Override
+    protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+        BlockState upState = world.getBlockState(pos.up());
+        BlockState upupState = world.getBlockState(pos.up(2));
+        return upState.isReplaceable() && upupState.isReplaceable();
+    }
+
+    @Override
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if(!world.isClient() && hand == Hand.MAIN_HAND) {
+            CrystalAltarBlockEntity blockEntity = (CrystalAltarBlockEntity) world.getBlockEntity(pos);
+
+            if(blockEntity != null) {
+                if(stack.isEmpty()) {
+                    // Remove crystal when clicking with an empty hand
+                    if (!blockEntity.containerEmpty()) {
+                        player.giveItemStack(blockEntity.removeCrystal((ServerPlayerEntity) player));
+                        return ActionResult.SUCCESS_SERVER;
+                    }
+                } else if(stack.getItem() instanceof InertCrystalItem){
+                    if (blockEntity.canPut(stack)){
+                        boolean isInert = !((InertCrystalItem) stack.getItem()).hasElement;
+                        blockEntity.addCrystal((ServerPlayerEntity) player, stack, isInert);
+                        return ActionResult.SUCCESS_SERVER;
+                    } else {
+                        return ActionResult.PASS;
+                    }
+                }
+            }
+        }
+        return ActionResult.FAIL;
     }
 }

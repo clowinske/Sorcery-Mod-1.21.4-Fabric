@@ -1,23 +1,33 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "block/block",
 	"textures": {
-		"1": "sorcerymod:block/crystal_altar_bottom",
-		"2": "sorcerymod:block/crystal_altar_top",
-		"3": "sorcerymod:block/crystal_altar_side",
-		"particle": "sorcerymod:block/crystal_altar_bottom"
+		"0": "sorcerymod:block/stone",
+		"particle": "sorcerymod:block/stone"
 	},
 	"elements": [
 		{
-			"from": [0, 0, 0],
+			"from": [0, 10, 0],
 			"to": [16, 12, 16],
 			"faces": {
-				"north": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "north"},
-				"east": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "east"},
-				"south": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "south"},
-				"west": {"uv": [0, 4, 16, 16], "texture": "#3", "cullface": "west"},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#2"},
-				"down": {"uv": [0, 0, 16, 16], "texture": "#1", "cullface": "down"}
+				"north": {"uv": [0, 0, 16, 2], "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 2], "texture": "#0"},
+				"south": {"uv": [0, 0, 16, 2], "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 2], "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#0"}
+			}
+		},
+		{
+			"from": [1, 0, 1],
+			"to": [15, 10, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 0, 1]},
+			"faces": {
+				"north": {"uv": [1, 6, 15, 16], "texture": "#0"},
+				"east": {"uv": [1, 6, 15, 16], "texture": "#0"},
+				"south": {"uv": [1, 6, 15, 16], "texture": "#0"},
+				"west": {"uv": [1, 6, 15, 16], "texture": "#0"},
+				"up": {"uv": [0, 0, 14, 14], "texture": "#missing"},
+				"down": {"uv": [1, 1, 15, 15], "texture": "#0"}
 			}
 		}
 	]
