@@ -51,7 +51,7 @@ public class CrystalPlaceParticle extends SpriteBillboardParticle {
         }
 
         if (this.age > 1) {
-            this.alpha = 1.0f; // Fully visible
+            this.alpha = (float) age/maxAge;
         }
 
         // Calculate movement back to spawn point
@@ -70,7 +70,7 @@ public class CrystalPlaceParticle extends SpriteBillboardParticle {
 
     @Override
     public ParticleTextureSheet getType() {
-        return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE;
+        return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     // Particle Factory
@@ -83,4 +83,3 @@ public class CrystalPlaceParticle extends SpriteBillboardParticle {
         }
     }
 }
-

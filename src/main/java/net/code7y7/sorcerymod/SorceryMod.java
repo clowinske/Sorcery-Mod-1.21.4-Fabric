@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class SorceryMod implements ModInitializer {
 	public static final String MOD_ID = "sorcerymod";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-//test last conflict
+//test test
 	@Override
 	public void onInitialize() {
 		ModItems.registerModItems();

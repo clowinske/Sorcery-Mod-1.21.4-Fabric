@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/handheld",
+	"textures": {
+		"layer0": "sorcerymod:item/crystal_pouch"
+	}
+}

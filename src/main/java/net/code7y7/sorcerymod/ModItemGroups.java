@@ -29,7 +29,8 @@ public class ModItemGroups {
                         //entries.add(ModItems.RADIANT_CRYSTAL);
                         entries.add(ModItems.INERT_CRYSTAL);
                         entries.add(ModBlocks.CRYSTAL_ALTAR);
-                        entries.add(ModItems.PARTICLE_TEST);
+                        entries.add(ModBlocks.ATTUNING_ORB);
+                        entries.add(ModItems.CRYSTAL_POUCH);
 
                     })).build());
 
