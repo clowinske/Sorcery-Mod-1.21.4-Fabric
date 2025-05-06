@@ -2,8 +2,7 @@ package net.code7y7.sorcerymod.util.crystal;
 
 import com.mojang.serialization.Codec;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class CrystalAbilities {
     public static final List<String> FIRE = Arrays.asList
@@ -19,9 +18,9 @@ public class CrystalAbilities {
             "pull","repulse","gravitational_anchor","graviton_burst",
             "singularity","anti-gravity_field","gravity_mastery","anti-gravity_mastery");
     public static final List<String> BODY = Arrays.asList
-            ("adrenaline_rush","body2","body3","body4",
-            "blood_sap","blood_sap_mastery","body7","body8",
-            "body9","body10","body11","body12");
+            ("adrenaline_rush","ironclad_metabolism","body3","body4",
+            "blood_sap","blood_sap_mastery","vitality_surplus","sanguine_bond",
+            "body9","body10","body11","body_mastery");
     public static final List<String> MIND = Arrays.asList
             ("mind1","mind2","mind3","mind4",
             "mind5","mind6","mind7","mind8",
@@ -42,4 +41,10 @@ public class CrystalAbilities {
             ("mind1","mind2","mind3","mind4",
                     "mind5","mind6","mind7","mind8",
                     "mind9","mind10","mind11","mind12");
+    public static final List<Map<Map<CrystalData, CrystalData>, String>> DUAL = Arrays.asList(
+            Collections.singletonMap(
+                    Collections.singletonMap(CrystalData.BODY, CrystalData.MIND),
+                    "astral_projection"
+            )
+    );
 }

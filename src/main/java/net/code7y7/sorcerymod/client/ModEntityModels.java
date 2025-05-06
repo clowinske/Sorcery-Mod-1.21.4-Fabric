@@ -8,6 +8,9 @@ public class ModEntityModels {
 
     public static void registerModels() {
         BlockEntityRendererFactories.register(ModBlockEntities.CRYSTAL_ALTAR_BE, CrystalAltarBERenderer::new);
+        BlockEntityRendererFactories.register(ModBlockEntities.ATTUNING_ORB_BE, AttuningOrbBERenderer::new);
+        BlockEntityRendererFactories.register(ModBlockEntities.SOURCE_LENS_BE, SourceLensBERenderer::new);
+
     }
     public static void registerModBlocksEntities(){
         SorceryMod.LOGGER.info("Registering Mod Blocks Entity Renderers for " + SorceryMod.MOD_ID);

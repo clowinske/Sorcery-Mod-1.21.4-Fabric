@@ -1,8 +1,10 @@
 package net.code7y7.sorcerymod.client;
 
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlockEntity;
+import net.code7y7.sorcerymod.item.ElementalCrystalItem;
 import net.code7y7.sorcerymod.item.InertCrystalItem;
 import net.code7y7.sorcerymod.item.ModItems;
+import net.code7y7.sorcerymod.particle.LightningParticleEffect;
 import net.code7y7.sorcerymod.util.crystal.CrystalData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
@@ -10,241 +12,289 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.entity.state.ItemDisplayEntityRenderState;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.item.property.select.DisplayContextProperty;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ModelTransformationMode;
-import net.minecraft.network.packet.s2c.play.LightData;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
-import java.util.Objects;
+import java.util.*;
+
+import static javax.swing.UIManager.put;
 
 public class CrystalAltarBERenderer implements BlockEntityRenderer<CrystalAltarBlockEntity > {
+    private final List<Map<Map<CrystalData, CrystalData>, Integer>> DUAL_ABILITIES = Arrays.asList(
+            new HashMap<>() {{
+                put(new HashMap<>() {{
+                    put(CrystalData.FIRE, CrystalData.ELECTRICITY);
+                }}, 1);
+            }},
+            new HashMap<>() {{put(new HashMap<>() {{
+                    put(CrystalData.ELECTRICITY, CrystalData.FIRE);
+                }}, 1);
+            }}
+    );
+    private final Vector3f colorEmpty = new Vector3f(0.7f, 0.7f, 0.7f);
     public CrystalAltarBERenderer(BlockEntityRendererFactory.Context context) {
-
     }
     @Override
     public void render(CrystalAltarBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         World world = entity.getWorld();
-        if(world == null)
+        if (world == null)
             return;
-        int SEGMENTS = 6;
-        float HEXAGON_RADIUS = 1.5f;
-        float ORBIT_RADIUS = .4f;
+
         int directionAngle = entity.getDirectionAngleOffset();
-        if(world.isClient) {
+
+        if (world.isClient) {
             BlockPos pos = entity.getPos();
             ItemStack slot0 = entity.getInventory().get(0);
 
             if (!slot0.isEmpty() && slot0.isOf(ModItems.INERT_CRYSTAL)) {
-                renderFloatingItem(world, pos, slot0, entity.getTickCount(), matrices, vertexConsumers, light, overlay, 0, 1.5, 0);
-                renderCircle(matrices, vertexConsumers, HEXAGON_RADIUS, 0.5f, 0.85f, 0.5f, SEGMENTS, "none", directionAngle, entity);
-            } else if(!slot0.isEmpty()) {
-                renderFloatingItem(world, pos, slot0, entity.getTickCount(), matrices, vertexConsumers, light, overlay, 0, 1.5, 0);
+                renderFloatingItem(world, pos, slot0, entity.getTickCount(), matrices, vertexConsumers, light, overlay, 0, 1.455, 0);
+                for (int i = 0; i < ((InertCrystalItem) slot0.getItem()).getTier(slot0); i++) {
+                    drawArc(world, pos, 1, colorEmpty, i+1, directionAngle, ((InertCrystalItem) slot0.getItem()).getTier(slot0));
+                    drawArc(world, pos, 2, colorEmpty, i+1, directionAngle, ((InertCrystalItem) slot0.getItem()).getTier(slot0));
+                    drawArc(world, pos, 3, colorEmpty, i+1, directionAngle, ((InertCrystalItem) slot0.getItem()).getTier(slot0));
+                }
             }
 
-            for(int i = 0; i < getHighestTier(entity.getInventory()); i++){ //render base lines for each tier
-                renderCircle(matrices, vertexConsumers, HEXAGON_RADIUS * (i+1), 0.5f, 0.749f + ((i+1) * 0.1f), 0.5f, SEGMENTS, "none", directionAngle, entity);
-            }
-            for (int i = 1; i <= 3; i++) { // add each crystals' color circle
+            // Variables to store the highest tier and color for each slot
+            int[] highestTiers = new int[3];
+            Vector3f[] colors = new Vector3f[3];
+
+            // For each crystal (slots 1 to 3), render its floating item and collect data for the arc
+            for (int i = 1; i <= 3; i++) {
                 ItemStack elementalCrystal = entity.getInventory().get(i);
                 if (!elementalCrystal.isEmpty()) {
-                    // angle calculation for each crystal (120 degrees apart)
+                    String crystalType = ((ElementalCrystalItem) elementalCrystal.getItem()).elementName;
+                    // Position the floating item for the crystal
                     float angle = (120 * (i - 1) + directionAngle);
-
                     double xOffset = Math.cos(Math.toRadians(angle)) * 0.5;
                     double zOffset = Math.sin(Math.toRadians(angle)) * 0.5;
-                    double yOffset = 1.2;
+                    double yOffset = 1.0;
 
                     renderFloatingItem(world, pos, elementalCrystal, entity.getTickCount(), matrices, vertexConsumers, light, overlay, xOffset, yOffset, zOffset);
 
-                    int crystalTier = ((InertCrystalItem) elementalCrystal.getItem()).getTier(elementalCrystal);
-                    if (crystalTier > 3) {
-                        crystalTier = 3;
+                    colors[i - 1] = CrystalData.getTypeByString(crystalType).getColorVec();
+                    highestTiers[i - 1] = ((InertCrystalItem) elementalCrystal.getItem()).getTier(elementalCrystal);
+                } else {
+                    colors[i - 1] = colorEmpty;
+                    highestTiers[i - 1] = getHighestTier(entity.getInventory());
+                }
+            }
+
+            // Draw arcs and circles for each slot
+            int globalHighestTier = getHighestTier(entity.getInventory());
+
+            for (int i = 1; i <= 3; i++) {
+                drawArc(world, pos, i, colors[i - 1], highestTiers[i - 1], directionAngle, globalHighestTier);
+                if (!entity.getInventory().get(i).isEmpty()) {
+                    for (int t = 1; t <= globalHighestTier; t++) {
+                        Vector3f circleColor = (t <= highestTiers[i - 1]) ? colors[i - 1] : colorEmpty;
+                        drawCircle(world, pos, i, t, circleColor, directionAngle);
                     }
+                }
+            }
+            for(int i = 1; i <=3; i++){ //for every slot
+                ItemStack thisStack = entity.getInventory().get(i);
+                ItemStack nextStack = entity.getInventory().get(getNextSlot(i));
+                ItemStack lastStack = entity.getInventory().get(getLastSlot(i));
+                ElementalCrystalItem thisItem = null;
+                ElementalCrystalItem nextItem = null;
+                ElementalCrystalItem lastItem = null;
+                if(!entity.getInventory().get(i).isEmpty())
+                    thisItem = (ElementalCrystalItem) thisStack.getItem();
+                if(!entity.getInventory().get(getNextSlot(i)).isEmpty())
+                    nextItem = (ElementalCrystalItem) entity.getInventory().get(getNextSlot(i)).getItem();
+                if(!entity.getInventory().get(getLastSlot(i)).isEmpty())
+                    lastItem = (ElementalCrystalItem) entity.getInventory().get(getLastSlot(i)).getItem();
 
-                    String crystalType = ((InertCrystalItem) elementalCrystal.getItem()).elementName;
-
-                    for (int j = 1; j < crystalTier + 1; j++) {
-                        renderCircle(matrices, vertexConsumers, HEXAGON_RADIUS * j, 0.5f, 0.75f + (j * 0.1f), 0.5f, SEGMENTS, i, crystalType, directionAngle, entity); // Big circles
-
-                        double smallXOffset = HEXAGON_RADIUS * (j) * Math.cos(Math.toRadians(angle));
-                        double smallZOffset = HEXAGON_RADIUS * (j) * Math.sin(Math.toRadians(angle));
-
-                        renderCircle(matrices, vertexConsumers, ORBIT_RADIUS, 0.5f + (float) smallXOffset, .75f + (j * 0.1f), 0.5f + (float) smallZOffset, SEGMENTS, crystalType, directionAngle, entity); // Little circles
+                for(int t = 1; t <= globalHighestTier; t++) {//for every tier, up to the highest present crystal's tier
+                    if (thisItem != null && thisItem.elementName.equals(CrystalData.FIRE.getName())) {//every fire dual ability
+                        if (t == 1 && thisItem.getTier(thisStack) >= t) {
+                            if (nextItem != null && nextItem.elementName.equals(CrystalData.ELECTRICITY.getName()) && nextItem.getTier(nextStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle + 60);
+                            }
+                            if (lastItem != null && lastItem.elementName.equals(CrystalData.ELECTRICITY.getName()) && lastItem.getTier(lastStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle - 60);
+                            }
+                        }
+                        if (t == 3 && thisItem.getTier(thisStack) >= t) {
+                            if (nextItem != null && nextItem.elementName.equals(CrystalData.GRAVITY.getName()) && nextItem.getTier(nextStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle + 60);
+                            }
+                            if (lastItem != null && lastItem.elementName.equals(CrystalData.GRAVITY.getName()) && lastItem.getTier(lastStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle - 60);
+                            }
+                        }
+                    }
+                    if(thisItem != null && thisItem.elementName.equals(CrystalData.ELECTRICITY.getName())) {//every electricity dual ability
+                        if (t == 3 && thisItem.getTier(thisStack) >= t) {
+                            if (nextItem != null && nextItem.elementName.equals(CrystalData.GRAVITY.getName()) && nextItem.getTier(nextStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle + 60);
+                            }
+                            if (lastItem != null && lastItem.elementName.equals(CrystalData.GRAVITY.getName()) && lastItem.getTier(lastStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle - 60);
+                            }
+                        }
+                    }
+                    if(thisItem != null && thisItem.elementName.equals(CrystalData.MIND.getName())) {//every electricity dual ability
+                        if (t == 3 && thisItem.getTier(thisStack) >= t) {
+                            if (nextItem != null && nextItem.elementName.equals(CrystalData.BODY.getName()) && nextItem.getTier(nextStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle + 60);
+                            }
+                            if (lastItem != null && lastItem.elementName.equals(CrystalData.BODY.getName()) && lastItem.getTier(lastStack) >= t) {
+                                drawCircle(world, pos, i, t, new Vector3f(1, 1, 0), directionAngle - 60);
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    private int getHighestTier(DefaultedList<ItemStack> inventory){
+
+    public int getNextSlot(int slot){
+        return slot % 3 + 1;
+    }
+    public int getLastSlot(int slot){
+        return (slot == 1) ? 3 : slot - 1;
+    }
+
+    private void drawArc(World world, BlockPos pos, int slot, Vector3f color, int tier, int angleOffset, int highestTier) {
+        if(world.isClient()) {
+            for (int currentTier = 1; currentTier <= highestTier; currentTier++) { // Loop through each tier up to the given tier
+                float radius = currentTier + 0.2f;
+
+                // Each slot covers a third of the circle (120° each)
+                float startAngle = (slot - 1) * 120f + angleOffset - 60;
+                float endAngle = slot * 120f + angleOffset - 60;
+
+                // Determine how many segments the arc should have
+                int segments = 2;
+                float angleIncrement = (endAngle - startAngle) / segments;
+
+                // Calculate the center of the block
+                double centerX = pos.getX() + 0.5;
+                double centerY = pos.getY() + 0.7 + (currentTier - 1) * 0.2; // Adjust height per tier
+                double centerZ = pos.getZ() + 0.5;
+
+                // Loop over each segment to spawn a custom particle
+                for (int i = 0; i < segments; i++) {
+                    // Calculate the angle for the next point in the arc
+                    float currentAngle = startAngle + i * angleIncrement;
+                    float nextAngle = startAngle + (i + 1) * angleIncrement;
+
+                    // Convert angles to radians
+                    double radCurrent = Math.toRadians(currentAngle);
+                    double radNext = Math.toRadians(nextAngle);
+
+                    // Calculate positions for the segment
+                    float startX = (float) (centerX + Math.cos(radCurrent) * radius);
+                    float startY = (float) centerY;
+                    float startZ = (float) (centerZ + Math.sin(radCurrent) * radius);
+
+                    float destX = (float) (centerX + Math.cos(radNext) * radius);
+                    float destY = (float) centerY;
+                    float destZ = (float) (centerZ + Math.sin(radNext) * radius);
+
+                    Vector3f destination = new Vector3f(destX, destY, destZ);
+
+                    // Spawn the custom arc particle
+                    if (currentTier <= tier) {
+                        world.addParticle(new LightningParticleEffect(color, destination, 0.01f, false, 0.0f, 1), startX, startY, startZ, 0, 0, 0);
+                    } else {
+                        world.addParticle(new LightningParticleEffect(colorEmpty, destination, 0.01f, false, 0.0f, 1), startX, startY, startZ, 0, 0, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    private void drawCircle(World world, BlockPos pos, int slot, int tier, Vector3f color, int angleOffset) {
+        if(world.isClient()) {
+            // The distance from the block center where the small circle will be drawn
+            float offsetRadius = 1.2f + (tier - 1) * 1.0f;
+
+            // The radius of the small circle (adjust as desired)
+            float circleRadius = 0.2f;
+
+            // Use more segments if you want a smoother small circle
+            int segments = 6;
+            float angleIncrement = 360f / segments;
+
+            // Calculate the center of the block
+            double centerX = pos.getX() + 0.5;
+            double centerY = pos.getY() + 0.7 + (tier - 1) * 0.2;
+            double centerZ = pos.getZ() + 0.5;
+
+            // Determine the angle for the offset position based on the slot
+            float angleForOffset = (slot - 1) * 120f + angleOffset;
+            double radOffset = Math.toRadians(angleForOffset);
+
+            // Calculate the center of the small circle (offset from the block center)
+            double circleCenterX = centerX + Math.cos(radOffset) * offsetRadius;
+            double circleCenterZ = centerZ + Math.sin(radOffset) * offsetRadius;
+
+            // Now draw the small circle around the offset center
+            for (int i = 0; i < segments; i++) {
+                // Compute the current angle for this segment of the small circle
+                float currentAngle = i * angleIncrement;
+                double radCurrent = Math.toRadians(currentAngle);
+
+                // Calculate the position on the small circle
+                float particleX = (float) (circleCenterX + Math.cos(radCurrent) * circleRadius);
+                float particleY = (float) centerY;
+                float particleZ = (float) (circleCenterZ + Math.sin(radCurrent) * circleRadius);
+
+                // For a smoother effect, compute the next point on the small circle
+                float nextAngle = (i + 1) * angleIncrement;
+                double radNext = Math.toRadians(nextAngle);
+                float destX = (float) (circleCenterX + Math.cos(radNext) * circleRadius);
+                float destY = (float) centerY;
+                float destZ = (float) (circleCenterZ + Math.sin(radNext) * circleRadius);
+
+                Vector3f destination = new Vector3f(destX, destY, destZ);
+
+                // Spawn the particle for the small circle segment
+                world.addParticle(new LightningParticleEffect(color, destination, 0.01f, false, 0.0f, 1), particleX, particleY, particleZ, 0, 0, 0);
+            }
+        }
+    }
+
+    private int getHighestTier(DefaultedList<ItemStack> inventory) {
         int highest = 0;
-        for(int i = 1; i <= 3; i++){
-            if(!inventory.get(i).isEmpty() && ((InertCrystalItem)inventory.get(i).getItem()).getTier(inventory.get(i)) > highest){
-                highest = ((InertCrystalItem)inventory.get(i).getItem()).getTier(inventory.get(i));
+        for (int i = 1; i <= 3; i++) {
+            if (!inventory.get(i).isEmpty() && ((InertCrystalItem) inventory.get(i).getItem()).getTier(inventory.get(i)) > highest) {
+                highest = ((InertCrystalItem) inventory.get(i).getItem()).getTier(inventory.get(i));
             }
         }
-        if(highest > 3)
-            highest = 3;
-        return highest;
+        return Math.min(highest, 3);
     }
-    private void renderCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float radius, float xOffset, float yOffset, float zOffset, int segments, String type, int directionAngle, CrystalAltarBlockEntity entity) {
-        VertexConsumer builder = vertexConsumers.getBuffer(RenderLayer.getLightning());
 
-        float lineThickness = 0.05f; // Approx. 1 pixel thick
-        Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
-
-        for (int i = 0; i < segments; i++) {
-            // Calculate the angles for the current and next segment
-            double angle1 = (2 * Math.PI / segments) * i + Math.toRadians(directionAngle);
-            double angle2 = (2 * Math.PI / segments) * (i + 1) + Math.toRadians(directionAngle);
-
-            // Calculate the x, z coordinates for the current and next segment
-            float x1 = (float) (radius * Math.cos(angle1) + xOffset) + entity.getPos().getX();
-            float z1 = (float) (radius * Math.sin(angle1) + zOffset) + entity.getPos().getZ();
-            float x2 = (float) (radius * Math.cos(angle2) + xOffset) + entity.getPos().getX();
-            float z2 = (float) (radius * Math.sin(angle2) + zOffset) + entity.getPos().getZ();
-
-            // Compute the vector perpendicular to the line segment for thickness
-            float dx = x2 - x1;
-            float dz = z2 - z1;
-            float length = (float) Math.sqrt(dx * dx + dz * dz);
-            dx /= length;
-            dz /= length;
-
-            // Perpendicular offset vector
-            float offsetX = -dz * lineThickness / 2;
-            float offsetZ = dx * lineThickness / 2;
-
-            // Define the vertices of the thick line segment as a quad
-            float x1a = x1 + offsetX - entity.getPos().getX(), z1a = z1 + offsetZ - entity.getPos().getZ();
-            float x1b = x1 - offsetX - entity.getPos().getX(), z1b = z1 - offsetZ - entity.getPos().getZ();
-            float x2a = x2 + offsetX - entity.getPos().getX(), z2a = z2 + offsetZ - entity.getPos().getZ();
-            float x2b = x2 - offsetX - entity.getPos().getX(), z2b = z2 - offsetZ - entity.getPos().getZ();
-
-            // Determine the color based on the type
-            int rgb;
-            if ("none".equals(type)) {
-                rgb = 0x909090; // Default gray color
-            } else {
-                rgb = CrystalData.getTypeByString(type).getColor();
-            }
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-
-            // Draw the quad (two triangles)
-            builder.vertex(positionMatrix, x1a, yOffset, z1a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2a, yOffset, z2a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2b, yOffset, z2b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-
-            builder.vertex(positionMatrix, x1a, yOffset, z1a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2b, yOffset, z2b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x1b, yOffset, z1b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-        }
-    }
-    private void renderCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float radius, float xOffset, float yOffset, float zOffset, int segments, int slot, String type, int directionAngle, CrystalAltarBlockEntity entity) {
-        VertexConsumer builder = vertexConsumers.getBuffer(RenderLayer.getLightning());
-        float lineThickness = 0.05f; // Approx. 1 pixel thick
-
-        int segmentsPerThird = segments / 3; // Number of segments for one-third of the circle
-        double baseAngle = Math.toRadians(120 * (slot - 1));
-        double directionRadians = Math.toRadians(directionAngle);
-        double angleOffset = baseAngle - (Math.PI / segments * segmentsPerThird / 2) - Math.toRadians(30);
-
-        Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
-
-        for (int i = 0; i < segmentsPerThird; i++) {
-            // Calculate the angles for this segment
-            double angle1 = angleOffset + (2 * Math.PI / segments) * i + directionRadians;
-            double angle2 = angleOffset + (2 * Math.PI / segments) * (i + 1) + directionRadians;
-
-            // Calculate the x, z coordinates for the segment
-            float x1 = (float) (radius * Math.cos(angle1) + xOffset);
-            float z1 = (float) (radius * Math.sin(angle1) + zOffset);
-            float x2 = (float) (radius * Math.cos(angle2) + xOffset);
-            float z2 = (float) (radius * Math.sin(angle2) + zOffset);
-
-            // Compute the perpendicular vector for thickness
-            float dx = x2 - x1;
-            float dz = z2 - z1;
-            float length = (float) Math.sqrt(dx * dx + dz * dz);
-            dx /= length;
-            dz /= length;
-
-            // Perpendicular offset vector
-            float offsetX = -dz * lineThickness / 2;
-            float offsetZ = dx * lineThickness / 2;
-
-            // Define vertices for the thick line segment as a quad
-            float x1a = x1 + offsetX, z1a = z1 + offsetZ;
-            float x1b = x1 - offsetX, z1b = z1 - offsetZ;
-            float x2a = x2 + offsetX, z2a = z2 + offsetZ;
-            float x2b = x2 - offsetX, z2b = z2 - offsetZ;
-
-            // Determine the color based on the type
-            int rgb;
-            if ("inert".equals(type)) {
-                rgb = 0x909090; // Default gray color
-            } else {
-                rgb = CrystalData.getTypeByString(type).getColor();
-            }
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-
-            // Render the quad (two triangles)
-            builder.vertex(positionMatrix, x1a, yOffset, z1a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2a, yOffset, z2a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2b, yOffset, z2b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-
-            builder.vertex(positionMatrix, x1a, yOffset, z1a).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x2b, yOffset, z2b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-            builder.vertex(positionMatrix, x1b, yOffset, z1b).color(r, g, b, 255).normal(0.0f, 1.0f, 0.0f);
-        }
-    }
-    private void renderFloatingItem(World world, BlockPos pos, ItemStack stack, int tickCount, MatrixStack matricies, VertexConsumerProvider vertexConsumers, int combinedLight, int combinedOverlay, double xOffset, double yOffset, double zOffset){
-        double relativeGameTime = world.getTime();
+    private void renderFloatingItem(World world, BlockPos pos, ItemStack stack, int tickCount, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int combinedLight, int combinedOverlay, double xOffset, double yOffset, double zOffset) {
+        double relativeGameTime = world.getTime() % 10000;
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
 
-        double rotation1 = (tickCount + relativeGameTime) * 5 % 360;
-        double rotation2 = Math.sin(relativeGameTime/20.0) * 40;
+        double rotation2 = Math.sin(relativeGameTime / 20.0) * 40;
         double offset = Math.sin(relativeGameTime / 10.0) / 12.0;
 
-        matricies.push();
-        matricies.translate(.5 + xOffset, yOffset+offset, 0.5 + zOffset);
-        matricies.scale(0.5f,0.5f,0.5f);
-        matricies.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)rotation2));
+        if (stack.getItem().equals(ModItems.INERT_CRYSTAL)) {
+            rotation2 = (tickCount + relativeGameTime) * 1 % 360;
+            offset = 0;
+        }
 
-        itemRenderer.renderItem(stack, ModelTransformationMode.FIXED, combinedLight, combinedOverlay, matricies, vertexConsumers, world, 1);
+        matrices.push();
+        matrices.translate(0.5 + xOffset, yOffset + offset, 0.5 + zOffset);
+        matrices.scale(0.5f, 0.5f, 0.5f);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) rotation2));
 
-        matricies.pop();
-    }
-    private void renderGhostItem(World world, BlockPos pos, ItemStack stack, int tickCount, MatrixStack matricies, VertexConsumerProvider vertexConsumers, int combinedLight, int combinedOverlay, double xOffset, double yOffset, double zOffset){
-        double relativeGameTime = world.getTime();
-        ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        itemRenderer.renderItem(stack, ModelTransformationMode.FIXED, combinedLight, combinedOverlay, matrices, vertexConsumers, world, 1);
 
-        double rotation1 = (tickCount + relativeGameTime) * 5 % 360;
-        double rotation2 = Math.sin(relativeGameTime/20.0) * 40;
-        double offset = Math.sin(relativeGameTime / 10.0) / 12.0;
-
-        matricies.push();
-        matricies.translate(.5 + xOffset, yOffset+offset, 0.5 + zOffset);
-        matricies.scale(0.5f,0.5f,0.5f);
-        matricies.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)rotation2));
-
-        itemRenderer.renderItem(stack, ModelTransformationMode.FIXED, combinedLight, combinedOverlay, matricies, vertexConsumers, world, 1);
-
-        matricies.pop();
+        matrices.pop();
     }
 }

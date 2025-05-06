@@ -1,11 +1,19 @@
 {
-	"required": true,
-	"package": "net.code7y7.sorcerymod.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "net.code7y7.sorcerymod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BodyDoubleHungerMixin"
+  ],
+  "client": [
+    "PlayerEntityMixin",
+    "FirstPersonArmMixin",
+    "RenderState",
+    "PlayerEntityRendererMixin"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

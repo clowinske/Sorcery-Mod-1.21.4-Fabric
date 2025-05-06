@@ -15,6 +15,13 @@ public class ModKeybinds {
     "category.sorcerymod.sorcerymod"
     ));
 
+    public static KeyBinding SPELL_SELECT_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            "key.sorcerymod.spell_select",
+            InputUtil.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            "category.sorcerymod.sorcerymod"
+    ));
+
     public static void registerModKeybinds(){
         SorceryMod.LOGGER.info("Registering Mod Keybinds for " + SorceryMod.MOD_ID);
     }

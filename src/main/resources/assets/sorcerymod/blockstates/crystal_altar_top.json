@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "sorcerymod:block/crystal_altar_top",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "sorcerymod:block/crystal_altar_top",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "sorcerymod:block/crystal_altar_top",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "sorcerymod:block/crystal_altar_top",
+      "y": 90
+    }
+  }
+}
