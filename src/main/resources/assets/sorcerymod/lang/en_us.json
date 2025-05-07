@@ -27,6 +27,8 @@
   "element.sorcerymod.discord": "Discord",
   "crystalorb.ui.theme": "Theme",
 
+  "effect.sorcerymod.stunned": "Stunned",
+
   "commands.upgradecrystal.no_player": "Player not found",
   "commands.upgradecrystal.inert": "Crystal must not be inert",
   "commands.upgradecrystal.success": "Crystal successfully upgraded",

@@ -8,6 +8,7 @@ import net.code7y7.sorcerymod.commands.CrystalAbilitiesCommand;
 import net.code7y7.sorcerymod.commands.DungeonCommand;
 import net.code7y7.sorcerymod.commands.UpgradeCrystalCommand;
 import net.code7y7.sorcerymod.component.ModDataComponentTypes;
+import net.code7y7.sorcerymod.effect.ModEffects;
 import net.code7y7.sorcerymod.entity.BossMob;
 import net.code7y7.sorcerymod.entity.EnemyMob;
 import net.code7y7.sorcerymod.entity.ModEntities;
@@ -55,6 +56,7 @@ public class SorceryMod implements ModInitializer {
 		ModSounds.registerSounds();
 		ModGamerules.registerGamerules();
 		ModStats.register();
+		ModEffects.registerEffects();
 
 		CrystalAbilitiesCommand.register();
 		UpgradeCrystalCommand.register();
