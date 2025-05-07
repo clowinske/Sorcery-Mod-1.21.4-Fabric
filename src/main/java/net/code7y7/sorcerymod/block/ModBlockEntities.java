@@ -3,6 +3,7 @@ package net.code7y7.sorcerymod.block;
 import net.code7y7.sorcerymod.SorceryMod;
 import net.code7y7.sorcerymod.block.AttunementOrbBlock.AttuningOrbBlockEntity;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlockEntity;
+import net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlockEntity;
 import net.code7y7.sorcerymod.block.SourceLensBlock.SourceLensBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
@@ -23,6 +24,8 @@ public class ModBlockEntities {
             registerBlockEntity("attuning_orb_be", AttuningOrbBlockEntity::new, ModBlocks.ATTUNING_ORB);
     public static final BlockEntityType<SourceLensBlockEntity> SOURCE_LENS_BE =
             registerBlockEntity("source_lens_be", SourceLensBlockEntity::new, ModBlocks.SOURCE_LENS);
+    public static final BlockEntityType<PortaeSigillumBlockEntity> PORTAE_SIGILLUM_BE =
+            registerBlockEntity("portae_sigillum_be", PortaeSigillumBlockEntity::new, ModBlocks.PORTAE_SIGILLUM);
 
     public static <T extends BlockEntity> BlockEntityType<T> registerBlockEntity (String name, FabricBlockEntityTypeBuilder.Factory<T> factory, Block... blocks) {
         BlockEntityType<T> type = FabricBlockEntityTypeBuilder.create( factory, blocks ).build();

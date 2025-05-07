@@ -58,5 +58,4 @@ public class AttuningOrbBERenderer implements BlockEntityRenderer<AttuningOrbBlo
         model.render(matrices, vertices, light, OverlayTexture.DEFAULT_UV);
         matrices.pop();
     }
-
 }

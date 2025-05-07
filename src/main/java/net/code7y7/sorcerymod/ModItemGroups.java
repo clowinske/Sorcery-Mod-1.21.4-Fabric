@@ -31,6 +31,7 @@ public class ModItemGroups {
                         entries.add(ModBlocks.CRYSTAL_ALTAR);
                         entries.add(ModBlocks.ATTUNING_ORB);
                         entries.add(ModItems.CRYSTAL_POUCH);
+                        entries.add(ModBlocks.PORTAE_SIGILLUM);
                         entries.add(ModItems.PRISMATIC_CRYSTAL);
 
                     })).build());

@@ -137,6 +137,7 @@ public class SorceryModClient implements ClientModInitializer {
         HudRenderCallback.EVENT.register(this::bodySpellHud);
         ClientTickEvents.END_CLIENT_TICK.register(this::bodyClientTick);
 
+
         ClientTickEvents.END_CLIENT_TICK.register(this::soulClientTick);
 
         TooltipComponentCallback.EVENT.register(data -> {
