@@ -80,9 +80,9 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
     public void addItem(ItemStack stack){
         for (int i = 0; i < inventory.size(); i++) {
             if (inventory.get(i).isEmpty()) {
-                inventory.set(i, stack.copy());
+                inventory.set(i, stack.split(1));
                 markDirty();
-                stack.copyAndEmpty();
+                //stack.decrement(1);
                 break;
             }
         }
