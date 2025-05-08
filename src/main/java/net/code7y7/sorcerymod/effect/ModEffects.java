@@ -22,6 +22,13 @@ public class ModEffects {
                 -1.0f,
                 EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
+    public static final RegistryEntry<StatusEffect> WEIGHTLESS = registerStatusEffect("weightless",
+        new WeightlessEffect(StatusEffectCategory.NEUTRAL, 0x22002e)
+            .addAttributeModifier(EntityAttributes.GRAVITY,
+                Identifier.of(SorceryMod.MOD_ID, "weightless"),
+                -1.0f,
+                EntityAttributeModifier.Operation.ADD_VALUE));
+
     private static RegistryEntry<StatusEffect> registerStatusEffect(String name, StatusEffect statusEffect) {
         return Registry.registerReference(Registries.STATUS_EFFECT, Identifier.of(SorceryMod.MOD_ID, name), statusEffect);
     }
