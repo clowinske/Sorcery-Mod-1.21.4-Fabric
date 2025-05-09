@@ -27,7 +27,7 @@ public class ModEffects {
             .addAttributeModifier(EntityAttributes.GRAVITY,
                 Identifier.of(SorceryMod.MOD_ID, "weightless"),
                 -1.0f,
-                EntityAttributeModifier.Operation.ADD_VALUE));
+                EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
     public static final RegistryEntry<StatusEffect> IGNITED = registerStatusEffect("ignited",
         new IgnitedEffect(StatusEffectCategory.HARMFUL, 0xd15000));
