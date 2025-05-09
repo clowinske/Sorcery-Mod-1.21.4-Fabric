@@ -4,10 +4,8 @@ import net.code7y7.sorcerymod.SorceryMod;
 import net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlockEntity;
 import net.code7y7.sorcerymod.entity.client.PortaeSigillumModel;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -21,6 +19,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.List;
+
+import static net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlockEntity.KEY_ITEM;
 
 public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigillumBlockEntity> {
 
@@ -41,7 +41,7 @@ public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigil
         int baseColor = 0xFFFFFF;
         int targetColor = 0xFF0000;
 
-        float t = (float) entity.getCraftingProgress() / entity.getMaxCraftingProgress();
+        float t = (float) Math.min(entity.getCraftingProgress(), entity.getMaxCraftingProgress()) / entity.getMaxCraftingProgress();
 
         int color = lerpColor(baseColor, targetColor, t);
 
@@ -81,42 +81,95 @@ public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigil
 
 
         matrices.pop();
+        if (entity.getCraftingProgress() > 0 && entity.getInventory().get(0).isOf(KEY_ITEM)) {
+            renderText(entity, matrices, vertexConsumers, light);
+        }
+    }
+
+    private void renderText(PortaeSigillumBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+        int remainingTicks = entity.maxPortalProgress - entity.getCraftingProgress();
+        float remainingSeconds = remainingTicks / 20.0f;
+
+        String text = String.format("%.1f", remainingSeconds);
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        TextRenderer textRenderer = client.textRenderer;
+
+        // Push a new matrix for the text
+        matrices.push();
+
+        // Move up +1 block (render above block center)
+        matrices.translate(0.5, 1.0, 0.5);
+
+        // Rotate so it faces the player
+        Camera camera = client.gameRenderer.getCamera();
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+
+        // Scale down (since font is designed for screen pixels, world units are bigger)
+        float scale = 0.02f;
+        matrices.scale(-scale, -scale, scale); // negative X/Y flips text upright
+
+        // Center text horizontally
+        float x = -textRenderer.getWidth(text) / 2f;
+        float y = 0;
+
+        textRenderer.draw(text, x, y, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+
+        matrices.pop();
     }
 
     private void renderItems(PortaeSigillumBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, double time){
         List<ItemStack> itemStacks = entity.getInventory();
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
 
-        Vec3d[] cornerOffsets = new Vec3d[] {
-                new Vec3d(-0.3, 0.0, -0.3), // bottom-left
-                new Vec3d( 0.3, 0.0, -0.3), // bottom-right
-                new Vec3d(-0.3, 0.0,  0.3), // top-left
-                new Vec3d( 0.3, 0.0,  0.3)  // top-right
-        };
+        // Check if lock item is present
+        ItemStack keyItemStack = null;
+        for (ItemStack stack : itemStacks) {
+            if (!stack.isEmpty() && stack.getItem() == KEY_ITEM) {
+                keyItemStack = stack;
+                break;
+            }
+        }
 
-        for (int i = 0; i < itemStacks.size() && i < 4; i++) {
-            ItemStack stack = itemStacks.get(i);
-            if (!stack.isEmpty()) {
-                matrices.push();
+        if (keyItemStack != null) {
+            matrices.push();
+            int progress = entity.getCraftingProgress();
 
-                // Move to corner position
-                int progress = entity.getCraftingProgress();
-                Vec3d offset = cornerOffsets[i];
-                Vec3d interpolated = offset.multiply(1.0 - progress/(float)entity.maxCraftingProgress); // scales toward 0
+            float floatOffset = (float)Math.sin(time * 0.05) * 0.05f;
+            matrices.translate(0, 0.15 + floatOffset - (1 - progress / (float)entity.maxPortalProgress), 0);
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)(time * 2 % 360)));
+            matrices.scale(0.5f, 0.5f, 0.5f);
 
-                matrices.translate(interpolated.x, interpolated.y + 0.15 + Math.sin((time + i * 10) * 0.05) * 0.05 - (1-progress/(float)entity.maxCraftingProgress), interpolated.z);
+            itemRenderer.renderItem(keyItemStack, ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 
+            matrices.pop();
+        } else {
+            // Render normal items in corners
+            Vec3d[] cornerOffsets = new Vec3d[] {
+                    new Vec3d(-0.3, 0.0, -0.3), // bottom-left
+                    new Vec3d( 0.3, 0.0, -0.3), // bottom-right
+                    new Vec3d(-0.3, 0.0,  0.3), // top-left
+                    new Vec3d( 0.3, 0.0,  0.3)  // top-right
+            };
 
-                // Rotate slowly around Y
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) (time * 2 % 360)));
+            for (int i = 0; i < itemStacks.size() && i < 4; i++) {
+                ItemStack stack = itemStacks.get(i);
+                if (!stack.isEmpty()) {
+                    matrices.push();
 
-                // Scale down a little (optional)
-                matrices.scale(0.4f, 0.4f, 0.4f);
+                    int progress = entity.getCraftingProgress();
+                    Vec3d offset = cornerOffsets[i];
+                    Vec3d interpolated = offset.multiply(1.0 - progress / (float)entity.maxCraftingProgress);
 
-                // Render item flat (or 3D if block)
-                itemRenderer.renderItem(stack, ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
+                    matrices.translate(interpolated.x, interpolated.y + 0.15 + Math.sin((time + i * 10) * 0.05) * 0.05 - (1 - progress / (float)entity.maxCraftingProgress), interpolated.z);
+                    matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) (time * 2 % 360)));
+                    matrices.scale(0.4f, 0.4f, 0.4f);
 
-                matrices.pop();
+                    itemRenderer.renderItem(stack, ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
+
+                    matrices.pop();
+                }
             }
         }
     }

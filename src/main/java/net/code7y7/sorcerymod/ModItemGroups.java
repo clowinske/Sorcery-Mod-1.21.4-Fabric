@@ -33,6 +33,8 @@ public class ModItemGroups {
                         entries.add(ModItems.CRYSTAL_POUCH);
                         entries.add(ModBlocks.PORTAE_SIGILLUM);
                         entries.add(ModItems.PRISMATIC_CRYSTAL);
+                        entries.add(ModItems.DUNGEON_KEY_PIECE);
+                        entries.add(ModItems.DUNGEON_KEY);
 
                     })).build());
 

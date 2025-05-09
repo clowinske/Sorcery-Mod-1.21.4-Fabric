@@ -1,7 +1,12 @@
 package net.code7y7.sorcerymod.block.PortaeSigillumBlock;
 
 import net.code7y7.sorcerymod.block.ModBlockEntities;
+import net.code7y7.sorcerymod.item.DungeonKeyItem;
+import net.code7y7.sorcerymod.item.InertCrystalItem;
 import net.code7y7.sorcerymod.item.ModItems;
+import net.code7y7.sorcerymod.network.CrystalPlaceParticlePayload;
+import net.code7y7.sorcerymod.util.crystal.CrystalData;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
@@ -29,19 +34,24 @@ import java.util.stream.Collectors;
 public class PortaeSigillumBlockEntity extends BlockEntity {
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(4, ItemStack.EMPTY);
     private int craftingProgress = 0;
-    public int maxCraftingProgress = 80;
+    public int maxCraftingProgress = 4 * 20;
+    public int maxPortalProgress = 10 * 20;
     private boolean crafting = false;
-    private static final int CRAFTING_RATE = 1;
     public static final List<RitualRecipe> RECIPES = new ArrayList<>();
+    public static final Item KEY_ITEM = ModItems.DUNGEON_KEY;
 
     static {
         RECIPES.add(new RitualRecipe(
                 List.of(Items.DIAMOND, Items.GOLD_INGOT, Items.EMERALD, Items.AIR),
-                ModItems.INERT_CRYSTAL
+                ModItems.INERT_CRYSTAL.getDefaultStack()
         ));
         RECIPES.add(new RitualRecipe(
-                List.of(Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT),
-                Items.DIAMOND
+                List.of(ModItems.DUNGEON_KEY_PIECE, ModItems.DUNGEON_KEY_PIECE, ModItems.DUNGEON_KEY_PIECE, ModItems.DUNGEON_KEY_PIECE),
+                ModItems.DUNGEON_KEY.getDefaultStack()
+        ));
+        RECIPES.add(new RitualRecipe(
+                List.of(KEY_ITEM, Items.AIR, Items.AIR, Items.AIR),
+                ItemStack.EMPTY
         ));
     }
 
@@ -125,33 +135,80 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
         return ItemStack.EMPTY;
     }
     public void addItem(ItemStack stack){
+        boolean isLockItem = stack.getItem() == KEY_ITEM;
+
+        if (isLockItem) {
+            for (ItemStack item : inventory) {
+                if (item.getItem() == KEY_ITEM) {
+                    return; //already has a key
+                }
+            }
+
+            for (ItemStack item : inventory) {
+                if (!item.isEmpty()) {
+                    return; //already has other items
+                }
+            }
+
+            for (int i = 0; i < inventory.size(); i++) {
+                if (inventory.get(i).isEmpty()) {
+                    inventory.set(i, stack.split(1));
+                    markDirty();
+                    break;
+                }
+            }
+            return;
+        }
+
+        for (ItemStack item : inventory) {
+            if (item.getItem() == KEY_ITEM) {
+                return; //dont allow other items if key is in inventory
+            }
+        }
+
+        //insert regular items
         for (int i = 0; i < inventory.size(); i++) {
             if (inventory.get(i).isEmpty()) {
                 inventory.set(i, stack.split(1));
                 markDirty();
-                //stack.decrement(1);
                 break;
             }
         }
     }
 
+
     private static int tickCount;
     public static void tick(World world, BlockPos blockPos, BlockState blockState, PortaeSigillumBlockEntity entity) {
         if (!world.isClient()) {
             tickCount++;
+            List<ServerPlayerEntity> entities = getPlayersInRadius((ServerWorld) world, blockPos, 15.0);
+            if (!entities.isEmpty()) {
+                for (ServerPlayerEntity player : entities) { //happens to each player in radius
+                    ItemStack heldItem = player.getMainHandStack();
+                    if(heldItem.isOf(ModItems.DUNGEON_KEY) && entity.getInventory().get(0).isEmpty())
+                        ServerPlayNetworking.send(player, new CrystalPlaceParticlePayload(blockPos, CrystalData.INERT.getColorInt(), 0));
+
+                }
+            }
+
             if (entity.isCrafting()) {
                 if(checkRecipe(entity.inventory) == null){
                     entity.cancelCrafting();
                 }
-                entity.craftingProgress += CRAFTING_RATE;
+                int maxProgress = entity.maxCraftingProgress;
+                if(entity.inventory.get(0).isOf(KEY_ITEM))
+                    maxProgress = entity.maxPortalProgress;
+                entity.craftingProgress += 1;
                 entity.markDirty();
-                if (entity.craftingProgress >= entity.maxCraftingProgress) {
+                if (entity.craftingProgress >= maxProgress) {
                     entity.craftingProgress = 0;
                     entity.markDirty();
                     entity.crafting = false;
 
                     if(checkRecipe(entity.inventory) != null) {
-                        ItemStack output = checkRecipe(entity.inventory).getResult().getDefaultStack();
+                        ItemStack output = checkRecipe(entity.inventory).getResult();
+                        if(output.isOf(ModItems.DUNGEON_KEY))
+                            ((DungeonKeyItem) output.getItem()).setSeed(output, ((DungeonKeyItem) output.getItem()).generateRandomSeed());
                         ItemEntity itemEntity = new ItemEntity(world, blockPos.getX() + 0.5, blockPos.getY() + 1.0, blockPos.getZ() + 0.5, output);
                         world.spawnEntity(itemEntity);
                     }
@@ -183,7 +240,7 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
         }
         return null;
     }
-    public List<ServerPlayerEntity> getPlayersInRadius(ServerWorld world, BlockPos blockPos, Double radius){
+    public static List<ServerPlayerEntity> getPlayersInRadius(ServerWorld world, BlockPos blockPos, Double radius){
         Box box = new Box(
                 blockPos.getX() - radius, blockPos.getY() - radius, blockPos.getZ() - radius,
                 blockPos.getX() + radius, blockPos.getY() + radius, blockPos.getZ() + radius

@@ -33,7 +33,8 @@ public class ModDataComponentTypes {
             register("pouch_id", builder -> builder.codec(Codec.STRING));
     public static final ComponentType<CrystalOptions> CRYSTAL_OPTIONS =
             register("crystal_options", builder -> builder.codec(CrystalOptions.CODEC));
-
+    public static final ComponentType<DungeonSeed> DUNGEON_SEED =
+            register("dungeon_seed", builder -> builder.codec(DungeonSeed.CODEC));
 
     private static <T>ComponentType<T> register(String name, UnaryOperator<ComponentType.Builder<T>> builderOperator){
         return Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(SorceryMod.MOD_ID,  name),
@@ -41,6 +42,6 @@ public class ModDataComponentTypes {
     }
 
     public static void registerDataComponentTypes(){
-        SorceryMod.LOGGER.info("Registering Data Component Types for" + SorceryMod.MOD_ID);
+
     }
 }

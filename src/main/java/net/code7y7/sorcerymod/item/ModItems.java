@@ -48,12 +48,15 @@ public class ModItems {
             new CrystalPouchItem(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID,"crystal_pouch")))));
     public static final Item PRISMATIC_CRYSTAL = registerItem("prismatic_crystal",
             new Item(new Item.Settings().rarity(Rarity.RARE).registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "prismatic_crystal")))));
+    public static final Item DUNGEON_KEY = registerItem("dungeon_key",
+            new DungeonKeyItem(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "dungeon_key")))));
+    public static final Item DUNGEON_KEY_PIECE = registerItem("dungeon_key_piece",
+            new Item(new Item.Settings().maxCount(4).rarity(Rarity.RARE).registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "dungeon_key_piece")))));
 
     private static Item registerItem(String name, Item item){
         return Registry.register(Registries.ITEM, Identifier.of(SorceryMod.MOD_ID,  name), item);
     }
 
     public static void registerModItems(){
-        SorceryMod.LOGGER.info("Registering Mod Items for "+ SorceryMod.MOD_ID);
     }
 }
