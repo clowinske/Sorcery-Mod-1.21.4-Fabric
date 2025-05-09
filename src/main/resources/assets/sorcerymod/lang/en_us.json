@@ -29,6 +29,7 @@
 
   "effect.sorcerymod.stunned": "Stunned",
   "effect.sorcerymod.weightless": "Weightless",
+  "effect.sorcerymod.ignited": "Ignited",
 
   "commands.upgradecrystal.no_player": "Player not found",
   "commands.upgradecrystal.inert": "Crystal must not be inert",

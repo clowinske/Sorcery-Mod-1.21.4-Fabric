@@ -29,6 +29,9 @@ public class ModEffects {
                 -1.0f,
                 EntityAttributeModifier.Operation.ADD_VALUE));
 
+    public static final RegistryEntry<StatusEffect> IGNITED = registerStatusEffect("ignited",
+        new IgnitedEffect(StatusEffectCategory.HARMFUL, 0xd15000));
+
     private static RegistryEntry<StatusEffect> registerStatusEffect(String name, StatusEffect statusEffect) {
         return Registry.registerReference(Registries.STATUS_EFFECT, Identifier.of(SorceryMod.MOD_ID, name), statusEffect);
     }
