@@ -1,10 +1,12 @@
 package net.code7y7.sorcerymod.block.PortaeSigillumBlock;
 
 import net.code7y7.sorcerymod.block.ModBlockEntities;
+import net.code7y7.sorcerymod.item.ModItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PortaeSigillumBlockEntity extends BlockEntity {
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(4, ItemStack.EMPTY);
@@ -29,6 +32,19 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
     public int maxCraftingProgress = 80;
     private boolean crafting = false;
     private static final int CRAFTING_RATE = 1;
+    public static final List<RitualRecipe> RECIPES = new ArrayList<>();
+
+    static {
+        RECIPES.add(new RitualRecipe(
+                List.of(Items.DIAMOND, Items.GOLD_INGOT, Items.EMERALD, Items.AIR),
+                ModItems.INERT_CRYSTAL
+        ));
+        RECIPES.add(new RitualRecipe(
+                List.of(Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT),
+                Items.DIAMOND
+        ));
+    }
+
 
     public PortaeSigillumBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PORTAE_SIGILLUM_BE, pos, state);
@@ -124,7 +140,7 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
         if (!world.isClient()) {
             tickCount++;
             if (entity.isCrafting()) {
-                if(!checkRecipe(entity.inventory)){
+                if(checkRecipe(entity.inventory) == null){
                     entity.cancelCrafting();
                 }
                 entity.craftingProgress += CRAFTING_RATE;
@@ -134,34 +150,38 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
                     entity.markDirty();
                     entity.crafting = false;
 
+                    if(checkRecipe(entity.inventory) != null) {
+                        ItemStack output = checkRecipe(entity.inventory).getResult().getDefaultStack();
+                        ItemEntity itemEntity = new ItemEntity(world, blockPos.getX() + 0.5, blockPos.getY() + 1.0, blockPos.getZ() + 0.5, output);
+                        world.spawnEntity(itemEntity);
+                    }
                     for (int i = 0; i < entity.inventory.size(); i++) {
                         entity.inventory.set(i, ItemStack.EMPTY);
                     }
-
-                    ItemStack output = new ItemStack(Items.DIAMOND);
-                    ItemEntity itemEntity = new ItemEntity(world, blockPos.getX() + 0.5, blockPos.getY() + 1.0, blockPos.getZ() + 0.5, output);
-                    world.spawnEntity(itemEntity);
-
                     entity.markDirty();
                 }
                 entity.markDirty();
             } else {
                 // Check for recipe inputs
-                boolean validRecipe = checkRecipe(entity.inventory);
+                boolean validRecipe = checkRecipe(entity.inventory) != null;
                 if (validRecipe) {
                     entity.startCrafting();
                 }
             }
         }
     }
-    private static boolean checkRecipe(DefaultedList<ItemStack> inventory) {
-        // Example: check if all 4 slots contain iron ingots
-        for (ItemStack stack : inventory) {
-            if (stack.isEmpty() || stack.getItem() != Items.IRON_INGOT) {
-                return false;
+    public static RitualRecipe checkRecipe(List<ItemStack> inputItems) {
+        List<Item> inputIngredients = inputItems.stream()
+                .map(ItemStack::getItem)
+                .toList();
+
+        for (RitualRecipe recipe : RECIPES) {
+            if (recipe.getIngredients().containsAll(inputIngredients) &&
+                    inputIngredients.containsAll(recipe.getIngredients())) {
+                return recipe;
             }
         }
-        return true;
+        return null;
     }
     public List<ServerPlayerEntity> getPlayersInRadius(ServerWorld world, BlockPos blockPos, Double radius){
         Box box = new Box(
