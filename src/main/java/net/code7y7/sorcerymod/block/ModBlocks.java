@@ -5,7 +5,7 @@ import net.code7y7.sorcerymod.block.AttunementOrbBlock.AttuningOrbBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarTipBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarTopBlock;
-import net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlock;
+import net.code7y7.sorcerymod.block.RitualGatewayBlock.RitualGatewayBlock;
 import net.code7y7.sorcerymod.block.SourceLensBlock.SourceLensBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -29,8 +29,8 @@ public class ModBlocks {
             new AttuningOrbBlock(AbstractBlock.Settings.create().strength(4f).requiresTool().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"attuning_orb")))), true);
     public static final Block SOURCE_LENS = registerBlock("source_lens",
             new SourceLensBlock(AbstractBlock.Settings.create().strength(4f).requiresTool().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"source_lens")))), true);
-    public static final Block PORTAE_SIGILLUM = registerBlock("portae_sigillum",
-            new PortaeSigillumBlock(AbstractBlock.Settings.create().strength(4f).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"portae_sigillum")))), true);
+    public static final Block RITUAL_GATEWAY = registerBlock("ritual_gateway",
+            new RitualGatewayBlock(AbstractBlock.Settings.create().strength(4f).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"ritual_gateway")))), true);
 
     private static Block registerBlock(String name, Block block, boolean registerItem){
         if(registerItem)

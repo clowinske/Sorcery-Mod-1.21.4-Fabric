@@ -1,4 +1,4 @@
-package net.code7y7.sorcerymod.block.PortaeSigillumBlock;
+package net.code7y7.sorcerymod.block.RitualGatewayBlock;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

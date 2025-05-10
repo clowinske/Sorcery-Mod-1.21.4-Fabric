@@ -1,10 +1,7 @@
-package net.code7y7.sorcerymod.block.PortaeSigillumBlock;
+package net.code7y7.sorcerymod.block.RitualGatewayBlock;
 
 import com.mojang.serialization.MapCodec;
-import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlockEntity;
 import net.code7y7.sorcerymod.block.ModBlockEntities;
-import net.code7y7.sorcerymod.block.ModBlocks;
-import net.code7y7.sorcerymod.item.InertCrystalItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -13,9 +10,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -30,11 +25,11 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.block.WireOrientation;
 import org.jetbrains.annotations.Nullable;
 
-public class PortaeSigillumBlock extends BlockWithEntity {
+public class RitualGatewayBlock extends BlockWithEntity {
     private static final VoxelShape SHAPE1 = Block.createCuboidShape(0, 0, 0, 16, 1, 16);
     private static final VoxelShape SHAPE = VoxelShapes.union(SHAPE1);
 
-    public PortaeSigillumBlock(Settings settings) {
+    public RitualGatewayBlock(Settings settings) {
         super(settings.nonOpaque());
     }
 
@@ -48,12 +43,12 @@ public class PortaeSigillumBlock extends BlockWithEntity {
 
     @Override
     protected MapCodec<? extends BlockWithEntity> getCodec() {
-        return createCodec(PortaeSigillumBlock::new);
+        return createCodec(RitualGatewayBlock::new);
     }
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new PortaeSigillumBlockEntity(pos, state);
+        return new RitualGatewayBlockEntity(pos, state);
     }
 
     @Override
@@ -68,15 +63,15 @@ public class PortaeSigillumBlock extends BlockWithEntity {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return validateTicker(type, ModBlockEntities.PORTAE_SIGILLUM_BE, PortaeSigillumBlockEntity::tick);
+        return validateTicker(type, ModBlockEntities.RITUAL_GATEWAY_BE, RitualGatewayBlockEntity::tick);
     }
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if(state.getBlock() != newState.getBlock()){
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if(blockEntity instanceof PortaeSigillumBlockEntity){
-                ItemScatterer.spawn(world, pos, ((PortaeSigillumBlockEntity) blockEntity).getInventory());
+            if(blockEntity instanceof RitualGatewayBlockEntity){
+                ItemScatterer.spawn(world, pos, ((RitualGatewayBlockEntity) blockEntity).getInventory());
             }
         }
         super.onStateReplaced(state, world, pos, newState, moved);
@@ -105,7 +100,7 @@ public class PortaeSigillumBlock extends BlockWithEntity {
     @Override
     protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient() && hand == Hand.MAIN_HAND) {
-            PortaeSigillumBlockEntity blockEntity = (PortaeSigillumBlockEntity) world.getBlockEntity(pos);
+            RitualGatewayBlockEntity blockEntity = (RitualGatewayBlockEntity) world.getBlockEntity(pos);
 
             if (blockEntity != null) {
                 if (stack.isEmpty()) {

@@ -1,8 +1,7 @@
-package net.code7y7.sorcerymod.block.PortaeSigillumBlock;
+package net.code7y7.sorcerymod.block.RitualGatewayBlock;
 
 import net.code7y7.sorcerymod.block.ModBlockEntities;
 import net.code7y7.sorcerymod.item.DungeonKeyItem;
-import net.code7y7.sorcerymod.item.InertCrystalItem;
 import net.code7y7.sorcerymod.item.ModItems;
 import net.code7y7.sorcerymod.network.CrystalPlaceParticlePayload;
 import net.code7y7.sorcerymod.util.crystal.CrystalData;
@@ -29,9 +28,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class PortaeSigillumBlockEntity extends BlockEntity {
+public class RitualGatewayBlockEntity extends BlockEntity {
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(4, ItemStack.EMPTY);
     private int craftingProgress = 0;
     public int maxCraftingProgress = 4 * 20;
@@ -56,8 +54,8 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
     }
 
 
-    public PortaeSigillumBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.PORTAE_SIGILLUM_BE, pos, state);
+    public RitualGatewayBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.RITUAL_GATEWAY_BE, pos, state);
     }
 
     @Override
@@ -95,14 +93,12 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
 
     public void startCrafting(){
         if(!crafting){
-            System.out.println("started crafting");
             crafting = true;
             craftingProgress = 0;
         }
     }
     private void cancelCrafting(){
         if(crafting) {
-            System.out.println("cancelled crafting");
             crafting = false;
             craftingProgress = 0;
             markDirty();
@@ -178,7 +174,7 @@ public class PortaeSigillumBlockEntity extends BlockEntity {
 
 
     private static int tickCount;
-    public static void tick(World world, BlockPos blockPos, BlockState blockState, PortaeSigillumBlockEntity entity) {
+    public static void tick(World world, BlockPos blockPos, BlockState blockState, RitualGatewayBlockEntity entity) {
         if (!world.isClient()) {
             tickCount++;
             List<ServerPlayerEntity> entities = getPlayersInRadius((ServerWorld) world, blockPos, 15.0);

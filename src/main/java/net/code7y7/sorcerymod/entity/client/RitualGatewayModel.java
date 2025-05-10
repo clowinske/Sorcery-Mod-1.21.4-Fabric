@@ -4,16 +4,15 @@ import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 
 // Made with Blockbench 4.12.4
 // Exported for Minecraft version 1.17+ for Yarn
 // Paste this class into your mod and generate all required imports
-public class PortaeSigillumModel extends Model {
+public class RitualGatewayModel extends Model {
 	public final ModelPart layer1;
 	public final ModelPart layer2;
 	public final ModelPart layer3;
-	public PortaeSigillumModel(ModelPart root) {
+	public RitualGatewayModel(ModelPart root) {
 		super(root, RenderLayer::getEntityTranslucent);
 		this.layer1 = root.getChild("layer1");
 		this.layer2 = root.getChild("layer2");

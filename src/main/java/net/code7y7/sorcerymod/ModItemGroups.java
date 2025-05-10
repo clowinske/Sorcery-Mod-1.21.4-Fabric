@@ -31,7 +31,7 @@ public class ModItemGroups {
                         entries.add(ModBlocks.CRYSTAL_ALTAR);
                         entries.add(ModBlocks.ATTUNING_ORB);
                         entries.add(ModItems.CRYSTAL_POUCH);
-                        entries.add(ModBlocks.PORTAE_SIGILLUM);
+                        entries.add(ModBlocks.RITUAL_GATEWAY);
                         entries.add(ModItems.PRISMATIC_CRYSTAL);
                         entries.add(ModItems.DUNGEON_KEY_PIECE);
                         entries.add(ModItems.DUNGEON_KEY);

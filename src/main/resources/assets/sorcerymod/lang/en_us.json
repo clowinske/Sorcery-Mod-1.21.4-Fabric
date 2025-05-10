@@ -15,7 +15,7 @@
   "item.sorcerymod.crystal_pouch": "Crystal Pouch",
   "item.sorcerymod.attuning_orb": "Attuning Orb",
   "item.sorcerymod.prismatic_crystal": "Prismatic Crystal",
-  "item.sorcerymod.portae_sigillum": "Portae Sigillum",
+  "item.sorcerymod.ritual_gateway": "Ritual Gateway",
   "item.sorcerymod.dungeon_key": "Dungeon Key",
   "item.sorcerymod.dungeon_key_piece": "Dungeon Key Piece",
 
@@ -28,6 +28,7 @@
   "element.sorcerymod.radiant": "Radiant",
   "element.sorcerymod.eclipse": "Eclipse",
   "element.sorcerymod.discord": "Discord",
+
   "crystalorb.ui.theme": "Theme",
 
   "commands.upgradecrystal.no_player": "Player not found",

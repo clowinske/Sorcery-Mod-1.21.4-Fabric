@@ -1,8 +1,8 @@
 package net.code7y7.sorcerymod.client;
 
 import net.code7y7.sorcerymod.SorceryMod;
-import net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlockEntity;
-import net.code7y7.sorcerymod.entity.client.PortaeSigillumModel;
+import net.code7y7.sorcerymod.block.RitualGatewayBlock.RitualGatewayBlockEntity;
+import net.code7y7.sorcerymod.entity.client.RitualGatewayModel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
@@ -20,22 +20,22 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-import static net.code7y7.sorcerymod.block.PortaeSigillumBlock.PortaeSigillumBlockEntity.KEY_ITEM;
+import static net.code7y7.sorcerymod.block.RitualGatewayBlock.RitualGatewayBlockEntity.KEY_ITEM;
 
-public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigillumBlockEntity> {
+public class RItualGatewayBERenderer implements BlockEntityRenderer<RitualGatewayBlockEntity> {
 
-    public PortaeSigillumBERenderer(BlockEntityRendererFactory.Context context) {
+    public RItualGatewayBERenderer(BlockEntityRendererFactory.Context context) {
 
     }
 
     @Override
-    public void render(PortaeSigillumBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(RitualGatewayBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         World world = entity.getWorld();
         if (world == null || !world.isClient)
             return;
 
-        PortaeSigillumModel model = new PortaeSigillumModel(PortaeSigillumModel.getTexturedModelData().createModel());
-        Identifier TEXTURE = SorceryMod.createIdentifier("textures/block/portae_sigillum.png");
+        RitualGatewayModel model = new RitualGatewayModel(RitualGatewayModel.getTexturedModelData().createModel());
+        Identifier TEXTURE = SorceryMod.createIdentifier("textures/block/ritual_gateway.png");
 
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(TEXTURE));
         int baseColor = 0xFFFFFF;
@@ -86,7 +86,7 @@ public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigil
         }
     }
 
-    private void renderText(PortaeSigillumBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    private void renderText(RitualGatewayBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         int remainingTicks = entity.maxPortalProgress - entity.getCraftingProgress();
         float remainingSeconds = remainingTicks / 20.0f;
 
@@ -119,7 +119,7 @@ public class PortaeSigillumBERenderer implements BlockEntityRenderer<PortaeSigil
         matrices.pop();
     }
 
-    private void renderItems(PortaeSigillumBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, double time){
+    private void renderItems(RitualGatewayBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, double time){
         List<ItemStack> itemStacks = entity.getInventory();
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
 

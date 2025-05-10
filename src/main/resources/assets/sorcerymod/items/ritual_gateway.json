@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "sorcerymod:item/portae_sigillum"
+    "model": "sorcerymod:item/ritual_gateway"
   }
 }
