@@ -5,6 +5,7 @@ import net.code7y7.sorcerymod.block.AttunementOrbBlock.AttuningOrbBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarTipBlock;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarTopBlock;
+import net.code7y7.sorcerymod.block.PuzzleBlock.PuzzleBlock;
 import net.code7y7.sorcerymod.block.RitualGatewayBlock.RitualGatewayBlock;
 import net.code7y7.sorcerymod.block.SourceLensBlock.SourceLensBlock;
 import net.minecraft.block.AbstractBlock;
@@ -31,6 +32,8 @@ public class ModBlocks {
             new SourceLensBlock(AbstractBlock.Settings.create().strength(4f).requiresTool().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"source_lens")))), true);
     public static final Block RITUAL_GATEWAY = registerBlock("ritual_gateway",
             new RitualGatewayBlock(AbstractBlock.Settings.create().strength(4f).registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"ritual_gateway")))), true);
+    public static final Block PUZZLE_BLOCK = registerBlock("puzzle_block",
+            new PuzzleBlock(AbstractBlock.Settings.create().strength(4f).requiresTool().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(SorceryMod.MOD_ID,"puzzle_block")))), true);
 
     private static Block registerBlock(String name, Block block, boolean registerItem){
         if(registerItem)

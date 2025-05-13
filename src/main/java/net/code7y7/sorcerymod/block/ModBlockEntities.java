@@ -3,6 +3,7 @@ package net.code7y7.sorcerymod.block;
 import net.code7y7.sorcerymod.SorceryMod;
 import net.code7y7.sorcerymod.block.AttunementOrbBlock.AttuningOrbBlockEntity;
 import net.code7y7.sorcerymod.block.CrystalAltarBlock.CrystalAltarBlockEntity;
+import net.code7y7.sorcerymod.block.PuzzleBlock.PuzzleBlockEntity;
 import net.code7y7.sorcerymod.block.RitualGatewayBlock.RitualGatewayBlockEntity;
 import net.code7y7.sorcerymod.block.SourceLensBlock.SourceLensBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -24,6 +25,8 @@ public class ModBlockEntities {
             registerBlockEntity("source_lens_be", SourceLensBlockEntity::new, ModBlocks.SOURCE_LENS);
     public static final BlockEntityType<RitualGatewayBlockEntity> RITUAL_GATEWAY_BE =
             registerBlockEntity("ritual_gateway_be", RitualGatewayBlockEntity::new, ModBlocks.RITUAL_GATEWAY);
+    public static final BlockEntityType<PuzzleBlockEntity> PUZZLE_BLOCK_BE =
+            registerBlockEntity("puzzle_block_be", PuzzleBlockEntity::new, ModBlocks.PUZZLE_BLOCK);
 
     public static <T extends BlockEntity> BlockEntityType<T> registerBlockEntity (String name, FabricBlockEntityTypeBuilder.Factory<T> factory, Block... blocks) {
         BlockEntityType<T> type = FabricBlockEntityTypeBuilder.create( factory, blocks ).build();
