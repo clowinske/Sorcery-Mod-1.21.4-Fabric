@@ -1,12 +1,15 @@
 package net.code7y7.sorcerymod.mixin;
 
 import net.code7y7.sorcerymod.entity.client.ModTrackedPlayerData;
+import net.code7y7.sorcerymod.item.weapon.WeaponItem;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +32,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements ModTrack
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    @Inject(method = "attack", at = @At("TAIL"))
+    private void initLeftHandCharge(Entity target, CallbackInfo ci) {
+        PlayerEntity player = (PlayerEntity)(Object)this;
+        ItemStack stack = player.getMainHandStack();
+
+        if(stack.getItem() instanceof WeaponItem weapon) {
+            weapon.onAttack(player, target);
+        }
     }
 
     @Inject(method = "initDataTracker", at = @At("TAIL"))

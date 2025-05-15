@@ -1,9 +1,12 @@
 package net.code7y7.sorcerymod.item;
 
 import net.code7y7.sorcerymod.SorceryMod;
+import net.code7y7.sorcerymod.item.weapon.LongSwordItem;
+import net.code7y7.sorcerymod.item.weapon.WeaponType;
 import net.code7y7.sorcerymod.util.crystal.CrystalAbilities;
 import net.code7y7.sorcerymod.util.crystal.CrystalData;
 import net.minecraft.item.Item;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -52,6 +55,8 @@ public class ModItems {
             new DungeonKeyItem(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "dungeon_key")))));
     public static final Item DUNGEON_KEY_PIECE = registerItem("dungeon_key_piece",
             new Item(new Item.Settings().maxCount(4).rarity(Rarity.RARE).registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "dungeon_key_piece")))));
+    public static final Item LONG_SWORD = registerItem("long_sword",
+            new LongSwordItem(WeaponType.LONG_SWORD, ToolMaterial.DIAMOND, 6.0f, 1f, new Item.Settings().maxCount(1).rarity(Rarity.UNCOMMON).registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(SorceryMod.MOD_ID, "long_sword")))));
 
     private static Item registerItem(String name, Item item){
         return Registry.register(Registries.ITEM, Identifier.of(SorceryMod.MOD_ID,  name), item);
