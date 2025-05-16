@@ -36,5 +36,6 @@ public class Packets {
     public static final Identifier ADD_TIME_PONDERING_C2S = SorceryMod.createIdentifier("add_time_pondering_c2s"); //client to server
     public static final Identifier SPAWN_PARTICLE_S2C = SorceryMod.createIdentifier("spawn_particle_s2c"); //server to client
     public static final Identifier SET_FOCUS_RECHARGE_S2C = SorceryMod.createIdentifier("set_focus_recharge_s2c"); //server to client
+    public static final Identifier IS_WEIGHTLESS_S2C = SorceryMod.createIdentifier("is_weightless_s2c"); //server to client
 
 }

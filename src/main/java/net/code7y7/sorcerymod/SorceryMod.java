@@ -88,6 +88,7 @@ public class SorceryMod implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(SetFocusS2CPayload.ID, SetFocusS2CPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(SpawnParticleS2CPayload.ID, SpawnParticleS2CPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(SetFocusRechargeS2CPayload.ID, SetFocusRechargeS2CPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(IsWeightlessS2CPayload.ID, IsWeightlessS2CPayload.CODEC);
 
 
 		//server packets

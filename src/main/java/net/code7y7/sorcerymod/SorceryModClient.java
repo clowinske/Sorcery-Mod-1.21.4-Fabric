@@ -38,6 +38,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
@@ -54,6 +55,7 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -622,6 +624,14 @@ public class SorceryModClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(SetFocusRechargeS2CPayload.ID, (payload, context) -> {
             context.client().execute(() -> {
                 playerData.focusRechargeCooldown = payload.amount();
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(IsWeightlessS2CPayload.ID, (payload, context) -> {
+            context.client().execute(()-> {
+                if (payload.isWeightless()) {
+                    context.player().input.playerInput = new PlayerInput(false, false, false, false, context.player().input.playerInput.jump(), context.player().input.playerInput.sneak(), context.player().input.playerInput.sprint());
+                }
             });
         });
     }
