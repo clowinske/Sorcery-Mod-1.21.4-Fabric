@@ -37,9 +37,15 @@ public class ModItemGroups {
                         entries.add(ModItems.DUNGEON_KEY);
 
                     })).build());
+    public static final ItemGroup WEAPONS_GROUP = Registry.register(Registries.ITEM_GROUP,
+            Identifier.of(SorceryMod.MOD_ID, "weapons"),
+            FabricItemGroup.builder().icon(() -> new ItemStack(ModItems.LONG_SWORD))
+                    .displayName(Text.translatable("itemgroup.sorcerymod.weapons_group"))
+                    .entries(((displayContext, entries) -> {
 
+                        entries.add(ModItems.LONG_SWORD);
+
+                    })).build());
     public static void registerItemGroups(){
-
-        SorceryMod.LOGGER.info("Registering Item Groups for " + SorceryMod.MOD_ID);
     }
 }
